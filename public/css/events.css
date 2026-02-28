@@ -1,0 +1,59 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  text-align: center;
+}
+
+h1 {
+  margin-top: 40px;
+}
+
+.subtitle {
+  margin-bottom: 20px;
+}
+
+/* Controls container */
+.controls-container {
+  width: 80%;
+  max-width: 900px;
+  margin: auto;
+  margin-bottom: 20px;
+
+  padding: 15px;
+
+  background-color: white;
+  border-radius: 8px;
+
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Inputs and selects */
+.controls-container input,
+.controls-container select {
+  padding: 10px;
+  margin: 5px;
+
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.events-container {
+  width: 80%;
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+
+  min-height: 200px;
+}
+
+.empty-message {
+  text-align: center;
+  color: #777;
+  font-size: 18px;
+  margin-top: 60px;
+}
