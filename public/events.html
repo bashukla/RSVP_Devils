@@ -3,17 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <title>Browse Events</title>
+  <link rel="stylesheet" href="css/events.css">
 </head>
 <body>
-  <h1>Browse Upcoming Events</h1>
-  <p>Discover campus events based on your interests.</p>
 
-  <ul>
-    <li>Career Fair – March 10</li>
-    <li>Tech Club Workshop – March 15</li>
-    <li>Networking Night – March 20</li>
-  </ul>
+<h1>Browse Events</h1>
+<p class="subtitle">Discover campus events based on your interests.</p>
 
-  <a href="/">Back to Home</a>
+<div class="controls-container">
+  <input type="text" id="searchInput" placeholder="Search events...">
+
+  <select id="categoryFilter">
+    <option value="">All Categories</option>
+  </select>
+
+  <select id="sortFilter">
+    <option value="">Sort By</option>
+  </select>
+</div>
+
+<div class="events-container" id="eventList">
+  <div class="empty-message">
+    No events available yet.
+  </div>
+</div>
+
 </body>
 </html>
