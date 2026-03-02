@@ -1,0 +1,229 @@
+:root {
+  --asu-maroon: #8C1D40;
+  --asu-gold: #FFC627;
+  --asu-black: #000000;
+  --light-gray: #f4f4f4;
+  --success-green: #28a745;
+  --error-red: #dc3545;
+  --cancel-orange: #fd7e14;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--light-gray);
+  margin: 0;
+  color: #333;
+}
+
+.asu-header-bar {
+  height: 10px;
+  background-color: var(--asu-maroon);
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.main-container {
+  margin-top: 40px;
+  text-align: center;
+  padding: 20px;
+  position: relative;
+}
+
+h1 {
+  color: var(--asu-maroon);
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.controls-container {
+  max-width: 900px;
+  margin: 0 auto 30px auto;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+input, select {
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  min-width: 200px;
+}
+
+input:focus, select:focus {
+  border-color: var(--asu-maroon);
+  outline: none;
+}
+
+.events-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.event-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: left;
+  border-top: 5px solid var(--asu-gold);
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  padding: 15px;
+  background-color: #fafafa;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-category {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--asu-maroon);
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.rsvp-count {
+  background-color: var(--asu-gold);
+  color: var(--asu-black);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.card-body {
+  padding: 20px;
+  flex-grow: 1;
+}
+
+.event-title {
+  margin: 0 0 10px 0;
+  color: var(--asu-black);
+  font-size: 18px;
+}
+
+.event-details {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.event-description {
+  font-size: 14px;
+  color: #555;
+  margin-top: 15px;
+  line-height: 1.4;
+}
+
+.card-actions {
+  padding: 15px;
+  border-top: 1px solid #eee;
+  background-color: #fafafa;
+}
+
+.rsvp-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+/* Button States */
+.rsvp-button.available {
+  background-color: var(--asu-maroon);
+  color: white;
+}
+
+.rsvp-button.available:hover {
+  background-color: #6b1630;
+  transform: translateY(-2px);
+}
+
+.rsvp-button.rsvped {
+  background-color: var(--success-green);
+  color: white;
+}
+
+.rsvp-button.cancel {
+  background-color: white;
+  color: var(--cancel-orange);
+  border: 2px solid var(--cancel-orange);
+}
+
+.rsvp-button.cancel:hover {
+  background-color: var(--cancel-orange);
+  color: white;
+}
+
+.rsvp-button.full {
+  background-color: #6c757d;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Notifications */
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 2000;
+  max-width: 400px;
+}
+
+.notification {
+  background: white;
+  border-left: 5px solid var(--asu-maroon);
+  padding: 15px 20px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification.success { border-left-color: var(--success-green); }
+.notification.error { border-left-color: var(--error-red); }
+.notification.info { border-left-color: var(--cancel-orange); }
+
+.notification-icon { font-size: 20px; font-weight: bold; }
+.notification-content h4 { margin: 0 0 5px 0; font-size: 16px; }
+.notification-content p { margin: 0; color: #666; font-size: 14px; }
+
+@keyframes slideIn {
+  from { transform: translateX(400px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.empty-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #777;
+  font-size: 18px;
+  margin-top: 60px;
+}

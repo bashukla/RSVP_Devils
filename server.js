@@ -117,7 +117,7 @@ app.post('/api/create-account', async (req, res) => {
     }
 });
 
-// Route: Logon
+// Route: Login 
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -175,6 +175,92 @@ app.get('/api/users', authenticateToken, async (req, res) => {
         res.status(500).json({ message: 'Error retrieving email addresses.' });
     }
 });
+
+// Route Get All Events 
+app.get('/api/events', async (req, res) => {
+    try {
+        const connection = await createConnection();
+        const [rows] = await connection.execute('SELECT * FROM events');
+        await connection.end(); // Close connection
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error retrieving events.' });
+    }
+});
+
+// Route Get All User Events
+app.get('/api/user-events', authenticateToken, async (req, res) => {
+    try {
+        const connection = await createConnection();
+
+        // Get user_id from email in JWT
+        const [userRows] = await connection.execute(
+            'SELECT user_id FROM user WHERE email = ?',
+            [req.user.email]
+        );
+
+        if (userRows.length === 0) {
+            await connection.end();
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const userId = userRows[0].user_id;
+        console.log('Fetching RSVPed events for userId:', userId);
+
+        // Query events joined with registration table
+        const [events] = await connection.execute(
+            `SELECT e.*
+             FROM events e
+             JOIN registration r ON e.event_id = r.event_id
+             WHERE r.user_id = ?`,
+            [userId]
+        );
+
+        console.log('Events fetched:', events);
+
+        await connection.end();
+
+        res.json(events);
+    } catch (error) {
+        console.error('Full error in /api/user-events:', error);
+        res.status(500).json({ message: 'Error retrieving user events.' });
+    }
+});
+
+// Route: Get All Events by Type or Location
+app.get('/api/events/type', authenticateToken, async (req, res) => {
+  const { type, location } = req.query;  // use 'type' column
+  try {
+    const connection = await createConnection();
+
+    // Base SQL
+    let sql = 'SELECT * FROM events';
+    const params = [];
+
+    // Add filters if provided
+    const conditions = [];
+    if (type && type.trim() !== '') {
+      conditions.push('type = ?');
+      params.push(type);
+    }
+    if (location && location.trim() !== '') {
+      conditions.push('location = ?');
+      params.push(location);
+    }
+    if (conditions.length > 0) {
+      sql += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    const [rows] = await connection.execute(sql, params);
+    await connection.end();
+    res.json(rows);
+  } catch (error) {
+    console.error('Error retrieving filtered events:', error);
+    res.status(500).json({ message: 'Error retrieving events.' });
+  }
+});
+
 //////////////////////////////////////
 //END ROUTES TO HANDLE API REQUESTS
 //////////////////////////////////////

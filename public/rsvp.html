@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASU Event RSVP | Sun Devil Central</title>
+  <link rel="stylesheet" href="css/rsvp.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="asu-header-bar"></div>
+
+  <div class="main-container">
+    <header>
+      <h1>Event RSVP</h1>
+      <p class="subtitle">Secure your spot at upcoming Arizona State University events.</p>
+    </header>
+
+    <div class="controls-container">
+      <input type="text" id="searchInput" placeholder="Search events...">
+      <select id="categoryFilter">
+        <option value="">All Categories</option>
+        <option value="Academic">Academic</option>
+        <option value="Social">Social</option>
+        <option value="Sports">Sports</option>
+      </select>
+    </div>
+
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <div class="events-container" id="eventList">
+      <div class="empty-message">Loading events...</div>
+    </div>
+  </div>
+
+  <script src="js/rsvp.js"></script>
+</body>
+</html>
