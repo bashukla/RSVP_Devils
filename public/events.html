@@ -2,31 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Browse Events</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sun Devil Central | Browse Events</title>
   <link rel="stylesheet" href="css/events.css">
+  <!-- Google Fonts for a cleaner look -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<h1>Browse Events</h1>
-<p class="subtitle">Discover campus events based on your interests.</p>
+  <!-- ASU Header Bar -->
+  <div class="asu-header-bar"></div>
 
-<div class="controls-container">
-  <input type="text" id="searchInput" placeholder="Search events...">
+  <h1>Browse Campus Events</h1>
+  <p class="subtitle">Discover what's happening at Arizona State University.</p>
 
-  <select id="categoryFilter">
-    <option value="">All Categories</option>
-  </select>
+  <div class="controls-container">
+    <input type="text" id="searchInput" placeholder="Search events (e.g., Football, Career)...">
 
-  <select id="sortFilter">
-    <option value="">Sort By</option>
-  </select>
-</div>
+    <select id="categoryFilter">
+      <option value="">All Categories</option>
+      <option value="Academic">Academic</option>
+      <option value="Social">Social</option>
+      <option value="Sports">Sports</option>
+    </select>
 
-<div class="events-container" id="eventList">
-  <div class="empty-message">
-    No events available yet.
+    <select id="sortFilter">
+      <option value="date-asc">Date (Soonest First)</option>
+      <option value="date-desc">Date (Latest First)</option>
+    </select>
   </div>
-</div>
 
+  <div class="events-container" id="eventList">
+    <!-- Events will be injected here by JavaScript -->
+    <div class="empty-message">
+      Loading events...
+    </div>
+  </div>
+
+  <script src="js/events.js"></script>
 </body>
 </html>
