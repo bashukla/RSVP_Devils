@@ -3,35 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Event Reminders</title>
+  <title>ASU Event Reminders | Sun Devil Central</title>
   <link rel="stylesheet" href="css/reminders.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <div class="asu-header-bar"></div>
+
   <header>
-    <h1>Automated Event Reminders</h1>
-    <p>Stay updated on events you’ve RSVP’d to</p>
+    <h1>Event Reminders</h1>
+    <p>Stay updated on events you've RSVP'd to at Arizona State University</p>
   </header>
 
   <main>
+    <!-- Reminder Settings -->
+    <div class="settings-card">
+      <h2>Reminder Settings</h2>
+      <div class="setting-item">
+        <label>
+          <input type="checkbox" id="emailReminders" checked>
+          <span>Enable email reminders (24 hours before event)</span>
+        </label>
+      </div>
+      <div class="setting-item">
+        <label>
+          <input type="email" id="userEmail" placeholder="Enter your ASU email" value="student@asu.edu">
+        </label>
+      </div>
+    </div>
+
+    <!-- Upcoming Reminders -->
     <div class="card">
-      <div class="reminder">
-        <strong>Career Fair</strong><br>
-        Reminder: Tomorrow at 10:00 AM
+      <h2>Upcoming Reminders</h2>
+      <p class="subtitle">Reminders will be sent 24 hours before the event starts</p>
+      <div id="remindersList">
+        <!-- Reminders will be injected here by JS -->
       </div>
+    </div>
 
-      <div class="reminder">
-        <strong>Tech Club Workshop</strong><br>
-        Reminder: March 15 at 5:00 PM
+    <!-- Email Preview -->
+    <div class="card">
+      <h2>Email Preview</h2>
+      <p class="subtitle">This is what you'll receive 24 hours before each event</p>
+      <div id="emailPreview" class="email-preview">
+        <!-- Email template will be shown here by JS -->
       </div>
+    </div>
 
-      <div class="reminder">
-        <strong>Networking Night</strong><br>
-        Reminder: March 20 at 6:30 PM
+    <!-- Cancelled RSVPs -->
+    <div class="card">
+      <h2>Cancelled RSVPs (No Reminders)</h2>
+      <div id="cancelledList">
+        <!-- Cancelled events will be shown here by JS -->
       </div>
+    </div>
 
-      <a href="/">← Back to Dashboard</a>
+    <div class="actions">
+      <a href="rsvp.html" class="btn-primary">Back to Event RSVP</a>
+      <button id="simulateSendBtn" class="btn-secondary">Simulate Send Reminder</button>
     </div>
   </main>
 
+  <!-- Notification Container -->
+  <div id="notificationContainer" class="notification-container"></div>
+
+  <script src="js/reminders.js"></script>
 </body>
 </html>
