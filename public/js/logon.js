@@ -35,7 +35,7 @@ logonForm.addEventListener('submit', async (event) => {
         const result = await response.json();
         if (response.ok) {
             localStorage.setItem('jwtToken', result.token);
-            window.location.href = '/';
+            window.location.href = '/index.html'; 
         } else {
             messageEl.textContent = result.message;
             messageEl.classList.add('error');

@@ -11,6 +11,10 @@ const port = 3000;
 app.use(express.json());
 
 // Serve static files from the "public" folder
+// Default route for root URL to serve logon.html
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/public/logon.html');
+});
 app.use(express.static('public'));
 
 //////////////////////////////////////
@@ -25,6 +29,12 @@ app.get('/', (req, res) => {
 app.get('/dashboard', (req, res) => {
     res.sendFile(__dirname + '/public/dashboard.html');
 });
+
+// Route to serve index.html
+app.get('/index', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
+});
+
 //////////////////////////////////////
 //END ROUTES TO SERVE HTML FILES
 //////////////////////////////////////
@@ -230,11 +240,10 @@ app.get('/api/user-events', authenticateToken, async (req, res) => {
 
 // Route: Get All Events by Type or Location
 app.get('/api/events/type', authenticateToken, async (req, res) => {
-  const { type, location } = req.query;  // use 'type' column
+  const { type, location } = req.query;  
   try {
     const connection = await createConnection();
 
-    // Base SQL
     let sql = 'SELECT * FROM events';
     const params = [];
 
