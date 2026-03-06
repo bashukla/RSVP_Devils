@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Check for JWT token when page loads
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+        window.location.href = '/logon.html';
+    }
+});
+  
   // Mock RSVP Data (events user has registered for)
   const userRSVPs = [
     { 

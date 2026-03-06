@@ -3,6 +3,7 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const path = require('path');
 
 const app = express();
 const port = 3000;
@@ -11,29 +12,43 @@ const port = 3000;
 app.use(express.json());
 
 // Serve static files from the "public" folder
-// Default route for root URL to serve logon.html
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/logon.html');
+app.use('/css', express.static('public/css'));
+app.use('/js', express.static('public/js'));
+app.use('/images', express.static('public/images'));
+
+// Public login page
+app.get(['/', '/logon.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'logon.html'));
 });
-app.use(express.static('public'));
 
 //////////////////////////////////////
 //ROUTES TO SERVE HTML FILES
 //////////////////////////////////////
-// Default route to serve logon.html
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/logon.html');
+
+app.get('/index.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Route to serve dashboard.html
-app.get('/dashboard', (req, res) => {
-    res.sendFile(__dirname + '/public/dashboard.html');
+app.get('/events.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'events.html'));
 });
 
-// Route to serve index.html
-app.get('/index', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
+app.get('/create-event.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'create-event.html'));
 });
+
+app.get('/dashboard.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+app.get('/rsvp.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'rsvp.html'));
+});
+
+app.get('/reminders.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'reminders.html'));
+});
+
 
 //////////////////////////////////////
 //END ROUTES TO SERVE HTML FILES
@@ -53,7 +68,7 @@ async function createConnection() {
     });
 }
 
-// **Authorization Middleware: Verify JWT Token and Check User in Database**
+// **Authorization API Middleware: Verify JWT Token and Check User in Database**
 async function authenticateToken(req, res, next) {
     const token = req.headers['authorization'];
 
@@ -89,6 +104,43 @@ async function authenticateToken(req, res, next) {
         }
     });
 }
+
+// **Page Access Middleware: Redirect to Login if No Valid JWT Token**
+async function authenticatePage(req, res, next) {
+    const token = req.headers['authorization'];
+
+    if (!token) {
+        return res.redirect('/logon.html');
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+        if (err) {
+            return res.redirect('/logon.html');
+        }
+
+        try {
+            const connection = await createConnection();
+
+            const [rows] = await connection.execute(
+                'SELECT email FROM user WHERE email = ?',
+                [decoded.email]
+            );
+
+            await connection.end();
+
+            if (rows.length === 0) {
+                return res.redirect('/logon.html');
+            }
+
+            req.user = decoded;
+            next();
+        } catch (dbError) {
+            console.error(dbError);
+            res.redirect('/logon.html');
+        }
+    });
+}
+
 /////////////////////////////////////////////////
 //END HELPER FUNCTIONS AND AUTHENTICATION MIDDLEWARE
 /////////////////////////////////////////////////

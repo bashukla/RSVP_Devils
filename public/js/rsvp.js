@@ -1,4 +1,10 @@
+
 document.addEventListener('DOMContentLoaded', () => {
+  // Check for JWT token when page loads
+  const token = localStorage.getItem("jwtToken");
+    if (!token) {
+        window.location.href = '/logon.html';
+    }
   // 1. Mock Data (Resets on every page load/refresh)
   const eventsData = [
     {
