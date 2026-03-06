@@ -270,6 +270,137 @@ app.get('/api/events/type', authenticateToken, async (req, res) => {
   }
 });
 
+// Route: Create Event
+app.post('/api/events', authenticateToken, async (req, res) => {
+    const { type, description, event_datetime, location } = req.body;
+
+    if (!type || !description || !event_datetime || !location) {
+        return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    try {
+        const connection = await createConnection();
+
+        // Get user_id from logged in user
+        const [userRows] = await connection.execute(
+            'SELECT user_id FROM user WHERE email = ?',
+            [req.user.email]
+        );
+
+        const userId = userRows[0].user_id;
+
+        // Insert event
+        const [result] = await connection.execute(
+            `INSERT INTO events (type, description, event_datetime, location, created_by)
+             VALUES (?, ?, ?, ?, ?)`,
+            [type, description, event_datetime, location, userId]
+        );
+
+        await connection.end();
+
+        res.status(201).json({
+            message: 'Event created successfully',
+            event_id: result.insertId
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error creating event.' });
+    }
+});
+
+// Route: Update Event
+app.put('/api/events/:id', authenticateToken, async (req, res) => {
+    const { type, description, event_datetime, location } = req.body;
+    const eventId = req.params.id;
+
+    if (!type || !description || !event_datetime || !location) {
+        return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    try {
+        const connection = await createConnection();
+
+        const [result] = await connection.execute(
+            `UPDATE events 
+             SET type = ?, description = ?, event_datetime = ?, location = ?
+             WHERE event_id = ?`,
+            [type, description, event_datetime, location, eventId]
+        );
+
+        await connection.end();
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Event not found.' });
+        }
+
+        res.json({ message: 'Event updated successfully.' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error updating event.' });
+    }
+});
+
+// Route: Update Event
+app.put('/api/events/:id', authenticateToken, async (req, res) => {
+    const { type, description, event_datetime, location } = req.body;
+    const eventId = req.params.id;
+
+    if (!type || !description || !event_datetime || !location) {
+        return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    try {
+        const connection = await createConnection();
+
+        const [result] = await connection.execute(
+            `UPDATE events 
+             SET type = ?, description = ?, event_datetime = ?, location = ?
+             WHERE event_id = ?`,
+            [type, description, event_datetime, location, eventId]
+        );
+
+        await connection.end();
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Event not found.' });
+        }
+
+        res.json({ message: 'Event updated successfully.' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error updating event.' });
+    }
+});
+
+// Route: Delete Event
+app.delete('/api/events/:id', authenticateToken, async (req, res) => {
+    const eventId = req.params.id;
+
+    try {
+        const connection = await createConnection();
+
+        const [result] = await connection.execute(
+            'DELETE FROM events WHERE event_id = ?',
+            [eventId]
+        );
+
+        await connection.end();
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Event not found.' });
+        }
+
+        res.json({ message: 'Event deleted successfully.' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error deleting event.' });
+    }
+});
+
 //////////////////////////////////////
 //END ROUTES TO HANDLE API REQUESTS
 //////////////////////////////////////
