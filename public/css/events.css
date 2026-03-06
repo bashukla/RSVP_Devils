@@ -146,3 +146,23 @@ h1 {
   font-size: 18px;
   margin-top: 60px;
 }
+
+ button {
+      padding: 12px 20px;
+      background-color: #FFC627;
+      color: black;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #e6b422;
+    }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #8C1D40;
+      font-weight: bold;
+    }

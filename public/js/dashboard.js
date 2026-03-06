@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Log out and redirect to login
     logoutButton.addEventListener('click', () => {
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        window.location.href = '/logon.html';
     });
 
     // Refresh list when the button is clicked
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial check for the token
     const token = localStorage.getItem('jwtToken');
     if (!token) {
-        window.location.href = '/login';
+        window.location.href = '/logon.html';
     } else {
         DataModel.setToken(token);
         renderUserList();
