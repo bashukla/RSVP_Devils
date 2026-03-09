@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+
   // Check for JWT token when page loads
   document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem("jwtToken");
@@ -259,4 +259,3 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial Load
   renderReminders();
   renderCancelled();
-});
