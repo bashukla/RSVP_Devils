@@ -70,11 +70,14 @@ async function createConnection() {
 
 // **Authorization API Middleware: Verify JWT Token and Check User in Database**
 async function authenticateToken(req, res, next) {
-    const token = req.headers['authorization'];
 
-    if (!token) {
+    const authHeader = req.headers['authorization'];
+
+    if (!authHeader) {
         return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
+
+    const token = authHeader.split(' ')[1]; // removes "Bearer "
 
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
         if (err) {
@@ -84,20 +87,20 @@ async function authenticateToken(req, res, next) {
         try {
             const connection = await createConnection();
 
-            // Query the database to verify that the email is associated with an active account
             const [rows] = await connection.execute(
                 'SELECT email FROM user WHERE email = ?',
                 [decoded.email]
             );
 
-            await connection.end();  // Close connection
+            await connection.end();
 
             if (rows.length === 0) {
                 return res.status(403).json({ message: 'Account not found or deactivated.' });
             }
 
-            req.user = decoded;  // Save the decoded email for use in the route
-            next();  // Proceed to the next middleware or route handler
+            req.user = decoded;
+            next();
+
         } catch (dbError) {
             console.error(dbError);
             res.status(500).json({ message: 'Database error during authentication.' });
@@ -107,18 +110,23 @@ async function authenticateToken(req, res, next) {
 
 // **Page Access Middleware: Redirect to Login if No Valid JWT Token**
 async function authenticatePage(req, res, next) {
-    const token = req.headers['authorization'];
 
-    if (!token) {
+    const authHeader = req.headers['authorization'];
+
+    if (!authHeader) {
         return res.redirect('/logon.html');
     }
 
+    const token = authHeader.split(' ')[1];
+
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+
         if (err) {
             return res.redirect('/logon.html');
         }
 
         try {
+
             const connection = await createConnection();
 
             const [rows] = await connection.execute(
@@ -134,6 +142,7 @@ async function authenticatePage(req, res, next) {
 
             req.user = decoded;
             next();
+
         } catch (dbError) {
             console.error(dbError);
             res.redirect('/logon.html');
@@ -358,39 +367,6 @@ app.post('/api/events', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error creating event.' });
-    }
-});
-
-// Route: Update Event
-app.put('/api/events/:id', authenticateToken, async (req, res) => {
-    const { type, description, event_datetime, location } = req.body;
-    const eventId = req.params.id;
-
-    if (!type || !description || !event_datetime || !location) {
-        return res.status(400).json({ message: 'All fields are required.' });
-    }
-
-    try {
-        const connection = await createConnection();
-
-        const [result] = await connection.execute(
-            `UPDATE events 
-             SET type = ?, description = ?, event_datetime = ?, location = ?
-             WHERE event_id = ?`,
-            [type, description, event_datetime, location, eventId]
-        );
-
-        await connection.end();
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Event not found.' });
-        }
-
-        res.json({ message: 'Event updated successfully.' });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error updating event.' });
     }
 });
 
