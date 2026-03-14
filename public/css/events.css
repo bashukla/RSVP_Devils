@@ -166,3 +166,105 @@ h1 {
       color: #8C1D40;
       font-weight: bold;
     }
+
+
+    /* New Event Button & Modal Styles */
+    .new-event-container {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+#newEventBtn {
+  background-color: #FFC627; /* ASU gold */
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+#newEventBtn:hover {
+  background-color: #E6B800;
+}
+
+/* Modal Overlay */
+#eventFormModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5); /* Dim background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+}
+
+/* Hidden initially */
+#eventFormModal.hidden {
+  display: none;
+}
+
+/* Modal Content */
+#eventFormModal .modal-content {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  position: relative;
+  animation: slideDown 0.3s ease;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Slide down animation */
+@keyframes slideDown {
+  from { transform: translateY(-50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Modal Form Elements */
+#eventFormModal form label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+#eventFormModal form input,
+#eventFormModal form select,
+#eventFormModal form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+#eventFormModal form button {
+  margin-top: 1.5rem;
+  padding: 0.7rem 1.2rem;
+  background-color: #FFC627; /* ASU gold */
+  border: none;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#eventFormModal form button:hover {
+  background-color: #E6B800;
+}
+
+/* Close button style */
+#closeModalBtn {
+  background-color: #ccc;
+  margin-left: 0.5rem;
+}
+
+#closeModalBtn:hover {
+  background-color: #999;
+}
