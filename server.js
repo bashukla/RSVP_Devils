@@ -333,7 +333,7 @@ app.get('/api/events/type', authenticateToken, async (req, res) => {
 
 // Route: Create Event
 app.post('/api/events', authenticateToken, async (req, res) => {
-    const { type, description, event_datetime, location } = req.body;
+    const { type, description, event_datetime, location, tags } = req.body;
 
     if (!type || !description || !event_datetime || !location) {
         return res.status(400).json({ message: 'All fields are required.' });
@@ -352,9 +352,9 @@ app.post('/api/events', authenticateToken, async (req, res) => {
 
         // Insert event
         const [result] = await connection.execute(
-            `INSERT INTO events (type, description, event_datetime, location, created_by)
-             VALUES (?, ?, ?, ?, ?)`,
-            [type, description, event_datetime, location, userId]
+            `INSERT INTO events (type, description, event_datetime, location, created_by, tags)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [type, description, event_datetime, location, userId, tags]
         );
 
         await connection.end();
@@ -372,7 +372,7 @@ app.post('/api/events', authenticateToken, async (req, res) => {
 
 // Route: Update Event
 app.put('/api/events/:id', authenticateToken, async (req, res) => {
-    const { type, description, event_datetime, location } = req.body;
+    const { type, description, event_datetime, location, tags } = req.body;
     const eventId = req.params.id;
 
     if (!type || !description || !event_datetime || !location) {
@@ -384,9 +384,9 @@ app.put('/api/events/:id', authenticateToken, async (req, res) => {
 
         const [result] = await connection.execute(
             `UPDATE events 
-             SET type = ?, description = ?, event_datetime = ?, location = ?
+             SET type = ?, description = ?, event_datetime = ?, location = ?, tags = ?
              WHERE event_id = ?`,
-            [type, description, event_datetime, location, eventId]
+            [type, description, event_datetime, location, tags, eventId]
         );
 
         await connection.end();
