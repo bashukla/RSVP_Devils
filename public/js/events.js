@@ -14,6 +14,7 @@ const eventListEl = document.getElementById('eventList');
 const searchInput = document.getElementById('searchInput');
 const categoryFilter = document.getElementById('categoryFilter');
 const sortFilter = document.getElementById('sortFilter');
+const tagsFilter = document.getElementById('tagsFilter');
 
 let eventsData = [];
 let selectedEventId = null;
@@ -42,6 +43,9 @@ modal.innerHTML = `
 
       <label>Location</label>
       <input id="location" type="text" placeholder="Event location" required>
+
+      <label>Tags</label>
+      <input id="tags" type="text" placeholder="(Optional)">
 
       <div class="modal-buttons">
         <button type="submit" id="saveEventBtn">Save</button>
@@ -89,6 +93,7 @@ function openModalForEdit(eventData) {
     modalForm.type.value = eventData.type;
     modalForm.event_datetime.value = new Date(eventData.event_datetime).toISOString().slice(0,16);
     modalForm.location.value = eventData.location;
+    modalForm.tags.value = eventData.tags;
     modal.classList.remove('hidden');
     deleteBtn.style.display = 'inline-block';
 }
@@ -184,10 +189,11 @@ function renderEvents(events) {
 function updateEvents() {
     let filtered = [...eventsData];
 
-    const searchTerm = searchInput.value.toLowerCase();
+    const searchTerm = searchInput.value.trim().toLowerCase();
     if (searchTerm) filtered = filtered.filter(event =>
         event.description.toLowerCase().includes(searchTerm) ||
-        event.location.toLowerCase().includes(searchTerm)
+        event.location.toLowerCase().includes(searchTerm) ||
+        (event.tags && event.tags.toLowerCase().includes(searchTerm))
     );
 
     const categoryValue = categoryFilter.value;
@@ -209,7 +215,8 @@ modalForm.addEventListener('submit', async (e) => {
         description: document.getElementById('description').value,
         type: document.getElementById('type').value,
         event_datetime: document.getElementById('event_datetime').value,
-        location: document.getElementById('location').value
+        location: document.getElementById('location').value,
+        tags: document.getElementById('tags').value
     };
 
     try {
@@ -279,6 +286,7 @@ deleteBtn.addEventListener('click', async () => {
 searchInput.addEventListener('input', updateEvents);
 categoryFilter.addEventListener('change', updateEvents);
 sortFilter.addEventListener('change', updateEvents);
+tagsFilter.addEventListener('change', updateEvents);
 
 // Initial Setup
 sortFilter.value = 'date-asc';
