@@ -258,6 +258,18 @@ h1 {
 #eventFormModal form button:hover {
   background-color: #E6B800;
 }
+.rsvp-count {
+  font-weight: bold;
+  color: #8C1D40;
+  margin-left: 10px;
+  display: inline-block;
+}
+/* Red cancel RSVP button */
+.rsvp-button.rsvped {
+  background-color: #E74C3C; /* Red */
+  color: #fff;
+  border: none;
+}
 
 /* Close button style */
 #closeModalBtn {

@@ -429,6 +429,113 @@ app.delete('/api/events/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// Route: RSVP to an Event
+app.post('/api/rsvp', authenticateToken, async (req, res) => {
+    const eventId = Number(req.body.event_id);
+    if (!eventId) return res.status(400).json({ message: 'Valid Event ID is required.' });
+
+    try {
+        const connection = await createConnection();
+
+        // Check if event exists
+        const [eventCheck] = await connection.execute(
+            'SELECT event_id FROM events WHERE event_id = ?',
+            [eventId]
+        );
+        if (eventCheck.length === 0) {
+            await connection.end();
+            return res.status(404).json({ message: 'Event does not exist.' });
+        }
+
+        // Get user_id
+        const [userRows] = await connection.execute(
+            'SELECT user_id FROM user WHERE email = ?',
+            [req.user.email]
+        );
+        const userId = userRows[0].user_id;
+
+        // Try inserting RSVP
+        try {
+            await connection.execute(
+                'INSERT INTO registration (user_id, event_id) VALUES (?, ?)',
+                [userId, eventId]
+            );
+        } catch (err) {
+            if (err.code === 'ER_DUP_ENTRY') {
+                await connection.end();
+                return res.status(409).json({ message: 'You have already RSVPed for this event.' });
+            } else {
+                throw err;
+            }
+        }
+
+        await connection.end();
+        res.status(201).json({ message: 'RSVP successful.' });
+
+    } catch (err) {
+        console.error('RSVP Error:', err);
+        res.status(500).json({ message: 'Error processing RSVP.' });
+    }
+});
+
+// Route: Cancel RSVP
+app.delete('/api/rsvp/:eventId', authenticateToken, async (req, res) => {
+    const eventId = Number(req.params.eventId);
+    if (!eventId) return res.status(400).json({ message: 'Valid Event ID is required.' });
+
+    try {
+        const connection = await createConnection();
+
+        // Get user_id
+        const [userRows] = await connection.execute(
+            'SELECT user_id FROM user WHERE email = ?',
+            [req.user.email]
+        );
+        const userId = userRows[0].user_id;
+
+        // Delete registration
+        const [result] = await connection.execute(
+            'DELETE FROM registration WHERE user_id = ? AND event_id = ?',
+            [userId, eventId]
+        );
+
+        await connection.end();
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'RSVP not found.' });
+        }
+
+        res.json({ message: 'RSVP cancelled.' });
+
+    } catch (err) {
+        console.error('Cancel RSVP Error:', err);
+        res.status(500).json({ message: 'Error cancelling RSVP.' });
+    }
+});
+
+// Route: Get RSVP count for all events
+app.get('/api/rsvp-count', async (req, res) => {
+    try {
+        const connection = await createConnection();
+
+        const [rows] = await connection.execute(
+            `SELECT e.event_id, e.type, e.description, e.event_datetime, e.location, 
+                    COUNT(r.user_id) AS rsvp_count
+             FROM events e
+             LEFT JOIN registration r ON e.event_id = r.event_id
+             GROUP BY e.event_id, e.type, e.description, e.event_datetime, e.location`
+        );
+
+        await connection.end();
+        res.json(rows);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching RSVP counts.' });
+    }
+});
+
+
 //////////////////////////////////////
 //END ROUTES TO HANDLE API REQUESTS
 //////////////////////////////////////
