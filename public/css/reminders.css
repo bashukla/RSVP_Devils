@@ -7,6 +7,77 @@
   --error-red: #dc3545;
 }
 
+/* GHOST TEXT INPUT STYLE */
+.setting-item input[type="email"] {
+    width: 100%; 
+    max-width: 300px; 
+    padding: 10px; 
+    border: none; /* Remove border for ghost look */
+    border-bottom: 2px solid #ddd; /* Only bottom border */
+    background: transparent;
+    font-size: 16px; 
+    color: #333;
+    transition: border-color 0.3s;
+}
+.setting-item input[type="email"]:focus {
+    border-color: var(--asu-maroon);
+    outline: none;
+}
+.setting-item input[type="email"]::placeholder {
+    color: #ccc;
+    font-style: italic;
+}
+
+/* ✅ CONFIRMATION MODAL STYLES */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+    backdrop-filter: blur(3px);
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    border-top: 5px solid var(--asu-maroon);
+    animation: slideIn 0.3s ease-out;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: var(--asu-maroon);
+}
+
+.modal-details {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+    font-size: 14px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Ensure buttons in modal match global styles */
+.modal-buttons .btn-primary, 
+.modal-buttons .btn-secondary {
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
 body {
   font-family: 'Roboto', sans-serif;
   margin: 0;

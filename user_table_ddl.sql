@@ -24,3 +24,16 @@
 --     FOREIGN KEY (event_id) REFERENCES events(event_id),
 --     UNIQUE (user_id,event_id)
 -- );
+
+CREATE TABLE IF NOT EXISTS `user_reminders` (
+    `reminder_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `event_id` INT NOT NULL,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `email_sent` TINYINT(1) DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`) ON DELETE CASCADE,
+    FOREIGN KEY (`event_id`) REFERENCES `events`(`event_id`) ON DELETE CASCADE,
+    UNIQUE KEY `unique_user_event` (`user_id`, `event_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
