@@ -442,6 +442,18 @@ app.delete('/api/events/:id', authenticateToken, async (req, res) => {
     try {
         const connection = await createConnection();
 
+        // 1. Delete RSVPs (dependent table)
+        await connection.execute(
+            'DELETE FROM registration WHERE event_id = ?',
+            [eventId]
+        );
+
+        // 2. Delete reminders (dependent table)
+        await connection.execute(
+            'DELETE FROM user_reminders WHERE event_id = ?',
+            [eventId]
+        );
+
         const [result] = await connection.execute(
             'DELETE FROM events WHERE event_id = ?',
             [eventId]
@@ -456,7 +468,7 @@ app.delete('/api/events/:id', authenticateToken, async (req, res) => {
         res.json({ message: 'Event deleted successfully.' });
 
     } catch (error) {
-        console.error(error);
+        console.error('Delete event error:', error);
         res.status(500).json({ message: 'Error deleting event.' });
     }
 });
