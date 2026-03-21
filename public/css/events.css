@@ -57,7 +57,7 @@ h1 {
   border-radius: 5px;
   border: 2px solid #ddd;
   font-size: 16px;
-  flex: 1 1 200px; /* Responsive flex */
+  flex: 1 1 200px;
 }
 
 .controls-container input:focus,
@@ -79,7 +79,7 @@ h1 {
   min-height: 200px;
 }
 
-/* Individual Event Card */
+/* Event Card */
 .event-card {
   background: white;
   border-radius: 8px;
@@ -132,13 +132,6 @@ h1 {
   color: #333;
 }
 
-.event-description {
-  font-size: 14px;
-  color: #555;
-  margin-top: 10px;
-  line-height: 1.4;
-}
-
 .empty-message {
   grid-column: 1 / -1;
   text-align: center;
@@ -147,35 +140,37 @@ h1 {
   margin-top: 60px;
 }
 
- button {
-      padding: 12px 20px;
-      background-color: #FFC627;
-      color: black;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #e6b422;
-    }
-    a {
-      display: inline-block;
-      margin-top: 20px;
-      text-decoration: none;
-      color: #8C1D40;
-      font-weight: bold;
-    }
+/* General Button */
+button {
+  padding: 12px 20px;
+  background-color: #FFC627;
+  color: black;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
+button:hover {
+  background-color: #e6b422;
+}
 
-    /* New Event Button & Modal Styles */
-    .new-event-container {
-  margin: 1rem 0;
+a {
+  display: inline-block;
+  margin-top: 20px;
+  text-decoration: none;
+  color: #8C1D40;
+  font-weight: bold;
+}
+
+/* New Event Button */
+.new-event-container {
+  margin: 0; 
   text-align: center;
 }
 
 #newEventBtn {
-  background-color: #FFC627; /* ASU gold */
+  background-color: #FFC627;
   border: none;
   padding: 0.5rem 1rem;
   font-size: 1rem;
@@ -188,6 +183,21 @@ h1 {
   background-color: #E6B800;
 }
 
+.top-controls {
+  width: 90%;
+  max-width: 900px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Toggle Buttons */
+.toggle-container {
+  display: flex;
+  gap: 10px;
+}
+
 /* Modal Overlay */
 #eventFormModal {
   position: fixed;
@@ -195,7 +205,7 @@ h1 {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5); /* Dim background */
+  background-color: rgba(0,0,0,0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -203,12 +213,10 @@ h1 {
   transition: opacity 0.3s ease;
 }
 
-/* Hidden initially */
 #eventFormModal.hidden {
   display: none;
 }
 
-/* Modal Content */
 #eventFormModal .modal-content {
   background-color: #fff;
   border-radius: 10px;
@@ -221,13 +229,11 @@ h1 {
   font-family: 'Roboto', sans-serif;
 }
 
-/* Slide down animation */
 @keyframes slideDown {
   from { transform: translateY(-50px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Modal Form Elements */
 #eventFormModal form label {
   display: block;
   margin-top: 1rem;
@@ -248,7 +254,7 @@ h1 {
 #eventFormModal form button {
   margin-top: 1.5rem;
   padding: 0.7rem 1.2rem;
-  background-color: #FFC627; /* ASU gold */
+  background-color: #FFC627;
   border: none;
   font-weight: bold;
   border-radius: 5px;
@@ -258,20 +264,52 @@ h1 {
 #eventFormModal form button:hover {
   background-color: #E6B800;
 }
+
+/* RSVP count */
 .rsvp-count {
   font-weight: bold;
   color: #8C1D40;
   margin-left: 10px;
   display: inline-block;
 }
-/* Red cancel RSVP button */
+
+/* RSVP buttons */
 .rsvp-button.rsvped {
-  background-color: #E74C3C; /* Red */
+  background-color: #E74C3C;
   color: #fff;
   border: none;
 }
 
-/* Close button style */
+/* disabled styling */
+.rsvp-button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* hover tooltip for disabled button */
+.rsvp-button:disabled:hover::after {
+  content: attr(title);
+  position: absolute;
+  background-color: #000;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+  transform: translate(-50%, -120%);
+  left: 50%;
+  top: 0;
+  z-index: 10;
+}
+
+/* tooltip positioning */
+.rsvp-button {
+  position: relative;
+}
+
+/* Close button */
 #closeModalBtn {
   background-color: #ccc;
   margin-left: 0.5rem;
@@ -279,4 +317,12 @@ h1 {
 
 #closeModalBtn:hover {
   background-color: #999;
+}
+
+/* Center RSVP button */
+.card-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
 }

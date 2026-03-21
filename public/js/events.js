@@ -1,10 +1,9 @@
-// EVENTS.JS
 document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem("jwtToken");
     loadEvents(token);
 });
 
-// DOM ELEMENTS
+// Dom elements
 const eventListEl = document.getElementById('eventList');
 const searchInput = document.getElementById('searchInput');
 const categoryFilter = document.getElementById('categoryFilter');
@@ -16,7 +15,10 @@ let eventsData = [];
 let userRSVPs = [];
 let selectedEventId = null;
 
-// MODAL SETUP
+// added state for toggle
+let eventView = 'upcoming';
+
+// Setup modal
 const modal = document.createElement('div');
 modal.id = 'eventFormModal';
 modal.className = 'modal hidden';
@@ -62,7 +64,27 @@ closeBtn.addEventListener('click', () => {
 
 if (newEventBtn) newEventBtn.addEventListener('click', () => openModalForCreate());
 
-// MODAL FUNCTIONS
+// toggle buttons
+const upcomingBtn = document.getElementById('upcomingBtn');
+const pastBtn = document.getElementById('pastBtn');
+
+if (upcomingBtn && pastBtn) {
+    upcomingBtn.addEventListener('click', () => {
+        eventView = 'upcoming';
+        upcomingBtn.classList.add('active');
+        pastBtn.classList.remove('active');
+        updateEvents();
+    });
+
+    pastBtn.addEventListener('click', () => {
+        eventView = 'past';
+        pastBtn.classList.add('active');
+        upcomingBtn.classList.remove('active');
+        updateEvents();
+    });
+}
+
+// Modal functions
 function openModalForCreate() {
     selectedEventId = null;
     modalTitle.textContent = 'New Event';
@@ -83,7 +105,7 @@ function openModalForEdit(eventData) {
     deleteBtn.style.display = 'inline-block';
 }
 
-// LOAD EVENTS
+// Load events and RSVP counts
 async function loadEvents(token) {
     try {
         const [eventsResp, rsvpResp] = await Promise.all([
@@ -97,7 +119,6 @@ async function loadEvents(token) {
         const events = await eventsResp.json();
         const rsvpData = await rsvpResp.json();
 
-        // Merge RSVP counts
         eventsData = events.map(event => {
             const rsvp = rsvpData.find(r => Number(r.event_id) === Number(event.event_id));
             return {
@@ -106,7 +127,6 @@ async function loadEvents(token) {
             };
         });
 
-        // Fetch user's RSVPs if logged in
         if (token) {
             const userEventsResp = await fetch('/api/user-events', {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -126,7 +146,7 @@ async function loadEvents(token) {
     }
 }
 
-// RENDER EVENTS
+// Render events 
 function renderEvents(events) {
     eventListEl.innerHTML = '';
     if (events.length === 0) {
@@ -145,6 +165,7 @@ function renderEvents(events) {
         const timeStr = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
         const isRsvped = userRSVPs.includes(Number(event.event_id));
+        const isPast = new Date(event.event_datetime).getTime() < new Date().getTime();
 
         card.innerHTML = `
         <div class="card-header">
@@ -160,13 +181,19 @@ function renderEvents(events) {
             <div class="event-details"><strong>Time:</strong> ${timeStr}</div>
             <div class="event-details"><strong>Location:</strong> ${event.location}</div>
             <div class="event-details"><strong>RSVPs:</strong> ${event.rsvp_count}</div>
-            <div class="event-details"><strong>Tag(s):</strong> ${event.tags}</div>
+            <div class="event-details"><strong>Tag(s):</strong> ${event.tags || ''}</div>
         </div>
         <div class="card-actions">
-            <button class="rsvp-button ${isRsvped ? 'rsvped' : ''}" 
-                    data-id="${event.event_id}" 
-                    ${!token ? 'disabled title="Login to RSVP"' : ''}>
-                ${isRsvped ? 'Cancel RSVP' : 'RSVP Now'}
+            <button 
+                class="rsvp-button ${isRsvped ? 'rsvped' : ''} ${isPast ? 'disabled' : ''}" 
+                data-id="${event.event_id}" 
+                ${!token ? 'disabled title="Login to RSVP"' : ''}
+                ${isPast ? 'disabled title="Event ended"' : ''}>
+                
+                ${isPast 
+                    ? (isRsvped ? 'Attended' : 'Not Attended') 
+                    : (isRsvped ? 'Cancel RSVP' : 'RSVP Now')
+                }
             </button>
         </div>
         `;
@@ -176,7 +203,7 @@ function renderEvents(events) {
     attachCardListeners(token);
 }
 
-// ATTACH ICON + RSVP LISTENERS
+// Attach listeners 
 function attachCardListeners(token) {
     document.querySelectorAll('.edit-icon').forEach(icon => {
         icon.addEventListener('click', () => {
@@ -246,7 +273,7 @@ function attachCardListeners(token) {
     });
 }
 
-// FILTER + SORT
+// Filter and sort events
 function updateEvents() {
     let filtered = [...eventsData];
     const searchTerm = searchInput.value.trim().toLowerCase();
@@ -261,13 +288,20 @@ function updateEvents() {
 
     if (categoryValue) filtered = filtered.filter(e => e.type === categoryValue);
 
+    const now = new Date();
+    if (eventView === 'upcoming') {
+        filtered = filtered.filter(e => new Date(e.event_datetime).getTime() >= now.getTime());
+    } else if (eventView === 'past') {
+        filtered = filtered.filter(e => new Date(e.event_datetime).getTime() < now.getTime());
+    }
+
     if (sortValue === 'date-asc') filtered.sort((a,b) => new Date(a.event_datetime) - new Date(b.event_datetime));
     else if (sortValue === 'date-desc') filtered.sort((a,b) => new Date(b.event_datetime) - new Date(a.event_datetime));
 
     renderEvents(filtered);
 }
 
-// MODAL SUBMISSION (CREATE/EDIT)
+// Modal submission
 modalForm.addEventListener('submit', async e => {
     e.preventDefault();
     const token = localStorage.getItem("jwtToken");
@@ -308,7 +342,7 @@ modalForm.addEventListener('submit', async e => {
     }
 });
 
-// MODAL DELETE BUTTON
+// Delete modal button
 deleteBtn.addEventListener('click', async () => {
     const token = localStorage.getItem("jwtToken");
     if (!token) return alert('Login required');
@@ -331,11 +365,11 @@ deleteBtn.addEventListener('click', async () => {
     }
 });
 
-// FILTER LISTENERS
+// listeners
 searchInput.addEventListener('input', updateEvents);
 categoryFilter.addEventListener('change', updateEvents);
 sortFilter.addEventListener('change', updateEvents);
 if (tagsFilter) tagsFilter.addEventListener('change', updateEvents);
 
-// INITIAL SORT
+// default sort
 sortFilter.value = 'date-asc';
