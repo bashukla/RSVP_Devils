@@ -386,7 +386,7 @@ app.post('/api/events', authenticateToken, async (req, res) => {
         const [result] = await connection.execute(
             `INSERT INTO events (type, description, event_datetime, location, created_by, tags)
              VALUES (?, ?, ?, ?, ?, ?)`,
-            [type, description, event_datetime, location, userId, tags]
+            [type, description, event_datetime, location, userId, tags?.trim() || null]
         );
 
         await connection.end();
@@ -418,7 +418,7 @@ app.put('/api/events/:id', authenticateToken, async (req, res) => {
             `UPDATE events 
              SET type = ?, description = ?, event_datetime = ?, location = ?, tags = ?
              WHERE event_id = ?`,
-            [type, description, event_datetime, location, tags, eventId]
+            [type, description, event_datetime, location, tags?.trim() || null, eventId]
         );
 
         await connection.end();

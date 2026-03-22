@@ -181,7 +181,7 @@ function renderEvents(events) {
             <div class="event-details"><strong>Time:</strong> ${timeStr}</div>
             <div class="event-details"><strong>Location:</strong> ${event.location}</div>
             <div class="event-details"><strong>RSVPs:</strong> ${event.rsvp_count}</div>
-            <div class="event-details"><strong>Tag(s):</strong> ${event.tags || ''}</div>
+            <div class="event-details"><strong>Tag(s):</strong> ${event.tags || 'None'}</div>
         </div>
         <div class="card-actions">
             <button 
@@ -312,7 +312,7 @@ modalForm.addEventListener('submit', async e => {
         type: document.getElementById('type').value,
         event_datetime: document.getElementById('event_datetime').value,
         location: document.getElementById('location').value,
-        tags: document.getElementById('tags').value
+        tags: document.getElementById('tags').value.trim() || null
     };
 
     try {
