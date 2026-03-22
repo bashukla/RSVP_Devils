@@ -15,6 +15,65 @@ let eventsData = [];
 let userRSVPs = [];
 let selectedEventId = null;
 
+// Custom Popup
+const popup = document.createElement('div');
+popup.id = 'customPopup';
+popup.className = 'hidden';
+popup.innerHTML = `
+  <div class="popup-content">
+    <div class="popup-top-border" id="popupBorder"></div>
+    <div class="popup-icon" id="popupIcon"></div>
+    <div class="popup-message" id="popupMessage"></div>
+    <div class="popup-buttons" id="popupButtons"></div>
+  </div>
+`;
+document.body.appendChild(popup);
+
+const popupBorder  = document.getElementById('popupBorder');
+const popupIcon    = document.getElementById('popupIcon');
+const popupMessage = document.getElementById('popupMessage');
+const popupButtons = document.getElementById('popupButtons');
+
+// Show error or success (auto-closes after 3s)
+function showPopup(type, message) {
+  popupBorder.className  = `popup-top-border ${type}`;
+  popupIcon.textContent  = type === 'error' ? '❌' : '✅';
+  popupMessage.textContent = message;
+  popupButtons.innerHTML = '';
+  popup.classList.remove('hidden');
+  setTimeout(() => popup.classList.add('hidden'), 3000);
+}
+
+// Show confirmation dialog, returns a Promise<boolean>
+function showConfirm(message) {
+  return new Promise(resolve => {
+    popupBorder.className    = 'popup-top-border confirm';
+    popupIcon.textContent    = '⚠️';
+    popupMessage.textContent = message;
+    popupButtons.innerHTML   = '';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = 'Confirm';
+    confirmBtn.className   = 'popup-btn-danger';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.className   = 'popup-btn-cancel';
+
+    confirmBtn.addEventListener('click', () => {
+      popup.classList.add('hidden');
+      resolve(true);
+    });
+    cancelBtn.addEventListener('click', () => {
+      popup.classList.add('hidden');
+      resolve(false);
+    });
+
+    popupButtons.appendChild(confirmBtn);
+    popupButtons.appendChild(cancelBtn);
+    popup.classList.remove('hidden');
+  });
+}
 // added state for toggle
 let eventView = 'upcoming';
 
@@ -214,28 +273,33 @@ function attachCardListeners(token) {
     });
 
     document.querySelectorAll('.delete-icon').forEach(icon => {
-        icon.addEventListener('click', async () => {
-            const eventId = icon.dataset.id;
-            if (!confirm("Delete this event?")) return;
-            if (!token) return alert('Login required');
-            try {
-                const resp = await fetch(`/api/events/${eventId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!resp.ok) throw new Error('Failed to delete');
-                await loadEvents(token);
-            } catch (err) {
-                console.error(err);
-                alert('Failed to delete event.');
-            }
-        });
+    icon.addEventListener('click', async () => {
+        const eventId = icon.dataset.id;
+        const token = localStorage.getItem('jwtToken');
+        if (!token) return showPopup('error', 'Sorry, but you must be logged in to continue');
+        
+        const confirmed = await showConfirm('Are you sure you want to delete this event?');
+        if (!confirmed) return;
+
+        try {
+            const resp = await fetch(`/api/events/${eventId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!resp.ok) throw new Error('Failed to delete');
+            await loadEvents(token);
+            showPopup('success', 'Event deleted successfully!');
+        } catch (err) {
+            console.error(err);
+            showPopup('error', 'Sorry, we are unable to delete event');
+        }
     });
+});
 
     document.querySelectorAll('.rsvp-button').forEach(btn => {
         btn.addEventListener('click', async () => {
             const token = localStorage.getItem('jwtToken');
-            if (!token) return alert('Login required to RSVP');
+            if (!token) return showPopup('error','Login required to RSVP');
 
             const eventId = Number(btn.dataset.id);
             const isRsvped = userRSVPs.includes(eventId);
@@ -267,7 +331,7 @@ function attachCardListeners(token) {
                 await loadEvents(token);
             } catch (err) {
                 console.error('RSVP Error:', err);
-                alert(err.message);
+                showPopup('error', err.message);
             }
         });
     });
@@ -305,7 +369,7 @@ function updateEvents() {
 modalForm.addEventListener('submit', async e => {
     e.preventDefault();
     const token = localStorage.getItem("jwtToken");
-    if (!token) return alert('Login required');
+    if (!token) return showPopup('error','Login required');
 
     const payload = {
         description: document.getElementById('description').value,
@@ -332,22 +396,25 @@ modalForm.addEventListener('submit', async e => {
         }
 
         if (!resp.ok) throw new Error('Failed to save event');
-        modal.classList.add('hidden');
-        modalForm.reset();
-        selectedEventId = null;
-        await loadEvents(token);
+            modal.classList.add('hidden');
+            modalForm.reset();
+            showPopup('success', selectedEventId ? 'Event updated successfully!' : 'Event created successfully!');
+            selectedEventId = null;
+            await loadEvents(token);
+
     } catch (err) {
         console.error(err);
-        alert('Failed to save event');
+        showPopup('error', 'Sorry, but we were unable to save event');
     }
 });
 
 // Delete modal button
 deleteBtn.addEventListener('click', async () => {
     const token = localStorage.getItem("jwtToken");
-    if (!token) return alert('Login required');
+    if (!token) return showPopup('error', 'Login required');
     if (!selectedEventId) return;
-    if (!confirm("Delete this event?")) return;
+    const confirmed = await showConfirm('Are you sure you want to delete this event?');
+    if (!confirmed) return;
 
     try {
         const resp = await fetch(`/api/events/${selectedEventId}`, {
@@ -359,9 +426,10 @@ deleteBtn.addEventListener('click', async () => {
         modalForm.reset();
         selectedEventId = null;
         await loadEvents(token);
+        showPopup('success', 'Event deleted successfully!');
     } catch (err) {
         console.error(err);
-        alert('Failed to delete event');
+        showPopup('error', 'Failed to delete event');
     }
 });
 
