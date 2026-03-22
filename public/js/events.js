@@ -181,7 +181,7 @@ function renderEvents(events) {
             <div class="event-details"><strong>Time:</strong> ${timeStr}</div>
             <div class="event-details"><strong>Location:</strong> ${event.location}</div>
             <div class="event-details"><strong>RSVPs:</strong> ${event.rsvp_count}</div>
-            <div class="event-details"><strong>Tag(s):</strong> ${event.tags || 'None'}</div>
+            ${event.tags ? `<div class="event-details"><strong>Tag(s):</strong> ${event.tags}</div>` : ''}
         </div>
         <div class="card-actions">
             <button 
