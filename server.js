@@ -529,9 +529,29 @@ app.post('/api/rsvp', authenticateToken, async (req, res) => {
         
         // Send RSVP Confirmation Email (after connection closed)
         const rsvpHtml = `
-            <h3>RSVP Confirmed</h3>
-            <p>You are registered for: ${event.description}</p>
-            <p>A reminder will be sent 24 hours before the event.</p>
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:auto; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
+                <div style="background:#8C1D40; padding:25px; text-align:center;">
+                    <h1 style="color:#FFC627; margin:0; font-size:24px;">Sun Devil Central</h1>
+                    <p style="color:white; margin:5px 0 0 0; font-size:14px;">Arizona State University</p>
+                </div>
+                <div style="padding:30px;">
+                    <h2 style="color:#8C1D40; margin-top:0;">RSVP Confirmed</h2>
+                    <p>Hi Sun Devil,</p>
+                    <p>You're all set! Your RSVP has been confirmed for the following event:</p>
+                    <div style="background:#f9f9f9; padding:20px; border-left:4px solid #FFC627; border-radius:4px; margin:20px 0;">
+                        <p style="margin:5px 0;"><strong>Event:</strong> ${event.description}</p>
+                        <p style="margin:5px 0;"><strong>Date:</strong> ${new Date(event.event_datetime).toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}</p>
+                        <p style="margin:5px 0;"><strong>Time:</strong> ${new Date(event.event_datetime).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' })}</p>
+                        <p style="margin:5px 0;"><strong>Location:</strong> ${event.location}</p>
+                    </div>
+                    <p>A reminder email will be sent 24 hours before the event starts.</p>
+                    <p>We look forward to seeing you there! <strong>Go Devils!</strong></p>
+                </div>
+                <div style="background:#f5f5f5; padding:15px; text-align:center; font-size:12px; color:#999;">
+                    <p style="margin:0;">Arizona State University | Sun Devil Central</p>
+                    <p style="margin:5px 0 0 0;">To manage your reminders, visit your account settings.</p>
+                </div>
+            </div>
         `;
         await sendEmail(req.user.email, `RSVP Confirmed: ${event.description}`, rsvpHtml);
         
@@ -584,9 +604,26 @@ app.delete('/api/rsvp/:eventId', authenticateToken, async (req, res) => {
         
         // 4. Send Cancellation Email (after connection closed)
         const cancelHtml = `
-            <h3>RSVP Cancelled</h3>
-            <p>You have cancelled your registration for: ${eventName}</p>
-            <p style="color:red;"><strong>No reminder will be sent for this event.</strong></p>
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:auto; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
+                <div style="background:#8C1D40; padding:25px; text-align:center;">
+                    <h1 style="color:#FFC627; margin:0; font-size:24px;">Sun Devil Central</h1>
+                    <p style="color:white; margin:5px 0 0 0; font-size:14px;">Arizona State University</p>
+                </div>
+                <div style="padding:30px;">
+                    <h2 style="color:#8C1D40; margin-top:0;">RSVP Cancelled</h2>
+                    <p>Hi Sun Devil,</p>
+                    <p>Your RSVP has been cancelled for the following event:</p>
+                    <div style="background:#fff5f5; padding:20px; border-left:4px solid #dc3545; border-radius:4px; margin:20px 0;">
+                        <p style="margin:5px 0;"><strong>Event:</strong> ${eventName}</p>
+                    </div>
+                    <p style="color:#dc3545;"><strong>No reminder will be sent for this event.</strong></p>
+                    <p>If this was a mistake, you can re-RSVP anytime from the events page.</p>
+                </div>
+                <div style="background:#f5f5f5; padding:15px; text-align:center; font-size:12px; color:#999;">
+                    <p style="margin:0;">Arizona State University | Sun Devil Central</p>
+                    <p style="margin:5px 0 0 0;">To manage your reminders, visit your account settings.</p>
+                </div>
+            </div>
         `;
         await sendEmail(userEmail, `RSVP Cancelled: ${eventName}`, cancelHtml);
         
@@ -617,6 +654,50 @@ app.get('/api/rsvp-count', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error fetching RSVP counts.' });
+    }
+});
+
+// Route: Test - Manually trigger reminder emails (dev/testing only)
+app.get('/api/reminders/test-send', authenticateToken, async (req, res) => {
+    let connection;
+    try {
+        connection = await createConnection();
+
+        const [rows] = await connection.execute(`
+            SELECT u.email, e.description as title, e.event_datetime, e.location, ur.reminder_id
+            FROM user_reminders ur
+            JOIN user u ON ur.user_id = u.user_id
+            JOIN events e ON ur.event_id = e.event_id
+            WHERE ur.is_active = 1
+            AND e.event_datetime >= NOW()
+        `);
+
+        if (rows.length === 0) {
+            return res.json({ message: 'No active reminders found.' });
+        }
+
+        for (const row of rows) {
+            const html = `
+                <h3>Event Reminder</h3>
+                <p>Hi Sun Devil,</p>
+                <p>This is a friendly reminder for the following event:</p>
+                <div style="background:#f9f9f9; padding:15px; border-left:4px solid #FFC627;">
+                    <p><strong>Event:</strong> ${row.title}</p>
+                    <p><strong>Time:</strong> ${row.event_datetime}</p>
+                    <p><strong>Location:</strong> ${row.location}</p>
+                </div>
+                <p>We look forward to seeing you there!</p>
+            `;
+            await sendEmail(row.email, `Reminder: ${row.title}`, html);
+            await connection.execute('UPDATE user_reminders SET email_sent = 1 WHERE reminder_id = ?', [row.reminder_id]);
+        }
+
+        res.json({ message: `Sent ${rows.length} reminder(s).` });
+    } catch (error) {
+        console.error('Test reminder error:', error);
+        res.status(500).json({ message: 'Error sending test reminders.' });
+    } finally {
+        if (connection) await connection.end();
     }
 });
 
@@ -667,12 +748,39 @@ app.post('/api/reminders/toggle', authenticateToken, async (req, res) => {
             ON DUPLICATE KEY UPDATE is_active = ?, email_sent = 0
         `, [userId, event_id, is_active, is_active]);
 
-        await connection.end(); // Close AFTER all queries
-
         // Send Confirmation Email (outside try block so connection is already closed)
         const status = is_active ? 'Enabled' : 'Disabled';
-        const html = `<p>Your reminder setting has been <strong>${status}</strong> for Event ID ${event_id}.</p>`;
-        await sendEmail(userEmail, `Reminder ${status}`, html);
+        const statusColor = is_active ? '#28a745' : '#dc3545';
+
+        // Get event name for the email
+        const [eventRows] = await connection.execute('SELECT description FROM events WHERE event_id = ?', [event_id]);
+        const eventName = eventRows.length > 0 ? eventRows[0].description : `Event ID ${event_id}`;
+
+        await connection.end();
+
+        const html = `
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:auto; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
+                <div style="background:#8C1D40; padding:25px; text-align:center;">
+                    <h1 style="color:#FFC627; margin:0; font-size:24px;">Sun Devil Central</h1>
+                    <p style="color:white; margin:5px 0 0 0; font-size:14px;">Arizona State University</p>
+                </div>
+                <div style="padding:30px;">
+                    <h2 style="color:#8C1D40; margin-top:0;">Reminder ${status}</h2>
+                    <p>Hi Sun Devil,</p>
+                    <p>Your reminder setting has been updated:</p>
+                    <div style="background:#f9f9f9; padding:20px; border-left:4px solid #FFC627; border-radius:4px; margin:20px 0;">
+                        <p style="margin:5px 0;"><strong>Event:</strong> ${eventName}</p>
+                        <p style="margin:5px 0;"><strong>Status:</strong> <span style="color:${statusColor}; font-weight:bold;">${status}</span></p>
+                    </div>
+                    <p>${is_active ? 'You will receive a reminder email 24 hours before this event.' : 'You will no longer receive a reminder for this event.'}</p>
+                </div>
+                <div style="background:#f5f5f5; padding:15px; text-align:center; font-size:12px; color:#999;">
+                    <p style="margin:0;">Arizona State University | Sun Devil Central</p>
+                    <p style="margin:5px 0 0 0;">To manage your reminders, visit your account settings.</p>
+                </div>
+            </div>
+        `;
+        await sendEmail(userEmail, `Reminder ${status}: ${eventName}`, html);
 
         res.json({ message: `Reminder ${status}` });
     } catch (error) {

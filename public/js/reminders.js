@@ -81,6 +81,17 @@ function loadUserEmail() {
     }
 }
 
+// Store loaded events for preview lookup
+let loadedEvents = [];
+
+// PREVIEW EMAIL for a specific event
+window.previewEmail = function(eventId) {
+    const event = loadedEvents.find(e => e.event_id === eventId);
+    if (!event) return;
+    updateEmailPreview(event);
+    document.querySelector('.card:has(#emailPreview)').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
 // LOAD REMINDERS FROM API
 async function loadReminders() {
     remindersList.innerHTML = '<div class="empty-state"><p>Loading your events...</p></div>';
@@ -98,6 +109,7 @@ async function loadReminders() {
         if (!response.ok) throw new Error('Failed to fetch reminders');
         
         const data = await response.json();
+        loadedEvents = data;
         renderReminders(data);
         
         // Update preview with first active reminder
@@ -148,6 +160,7 @@ function renderReminders(events) {
                     onclick="openConfirmModal(${event.event_id}, '${event.title}', '${event.event_datetime}', '${event.location}', ${toggleState})">
                     ${actionText}
                 </button>
+                ${event.is_active ? `<button class="btn-preview" onclick="previewEmail(${event.event_id})">Preview Email</button>` : ''}
             </div>
         `;
 

@@ -393,6 +393,25 @@ main {
   to { transform: translateX(0); opacity: 1; }
 }
 
+/* Preview Email Button */
+.btn-preview {
+  display: block;
+  margin-top: 8px;
+  padding: 5px 10px;
+  font-size: 12px;
+  background: transparent;
+  color: var(--asu-maroon);
+  border: 1px dashed var(--asu-maroon);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-preview:hover {
+  background: var(--asu-maroon);
+  color: white;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;
