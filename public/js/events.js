@@ -324,9 +324,13 @@ function attachCardListeners(token) {
 
                 const data = await resp.json();
                 if (!resp.ok) throw new Error(data.message || 'RSVP failed');
-
-                if (isRsvped) userRSVPs = userRSVPs.filter(id => id !== eventId);
-                else userRSVPs.push(eventId);
+                if (isRsvped) {
+                    userRSVPs = userRSVPs.filter(id => id !== eventId);
+                    showPopup('success', 'RSVP cancelled successfully!');
+                } else {
+                    userRSVPs.push(eventId);
+                    showPopup('success', 'RSVP successful!');
+                }
 
                 await loadEvents(token);
             } catch (err) {
