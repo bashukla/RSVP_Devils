@@ -408,6 +408,32 @@ a {
   margin: -2rem -2rem 1.5rem -2rem;
   border-radius: 10px 10px 0 0;
 }
+/* NAVBAR */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #8C1D40;
+  padding: 12px 20px;
+  color: white;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 18px;
+  color: #FFC627;
+}
+
+.nav-right a {
+  color: white;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: 500;
+}
+
+.nav-right a:hover {
+  text-decoration: underline;
+}
 
 #customPopup .popup-top-border.error   { background-color: #E74C3C; }
 #customPopup .popup-top-border.success { background-color: #28a745; }

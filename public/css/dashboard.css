@@ -64,3 +64,29 @@ h1 {
     padding: 10px;
     border-bottom: 1px solid #ddd;
 }
+/* NAVBAR */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #8C1D40;
+    padding: 12px 20px;
+    color: white;
+  }
+  
+  .logo {
+    font-weight: bold;
+    font-size: 18px;
+    color: #FFC627;
+  }
+  
+  .nav-right a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    font-weight: 500;
+  }
+  
+  .nav-right a:hover {
+    text-decoration: underline;
+  }
