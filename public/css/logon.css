@@ -16,6 +16,18 @@ body {
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.asu-logo {
+    height: 60px;
+    width: auto;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 480px) {
+    .container { margin: 10% 15px; }
+    .asu-logo { height: 45px; }
 }
 
 h1 {

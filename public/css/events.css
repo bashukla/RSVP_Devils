@@ -5,6 +5,47 @@
   --light-gray: #f4f4f4;
 }
 
+/* Campus Banner */
+.campus-banner {
+  background-color: #8C1D40;
+  border-bottom: 4px solid #FFC627;
+  color: white;
+  padding: 20px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.campus-banner .asu-logo {
+  height: 60px;
+  width: auto;
+  background: white;
+  padding: 6px 10px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.campus-banner .banner-text h1 {
+  margin: 0 0 4px 0;
+  font-size: 22px;
+  color: white;
+}
+
+.campus-banner .banner-text .subtitle {
+  color: rgba(255,255,255,0.85);
+  margin: 0;
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .campus-banner { flex-direction: column; text-align: center; padding: 15px; }
+  .campus-banner .asu-logo { height: 45px; }
+  .campus-banner .banner-text h1 { font-size: 18px; }
+}
+
 body {
   font-family: 'Roboto', sans-serif;
   background-color: var(--light-gray);

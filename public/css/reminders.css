@@ -99,9 +99,24 @@ body {
 header {
   background-color: var(--asu-maroon);
   color: white;
-  padding: 40px 20px;
+  padding: 20px 30px;
   text-align: center;
   margin-top: 10px;
+}
+
+.asu-logo {
+  height: 70px;
+  width: auto;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 600px) {
+  .asu-logo { height: 50px; }
+  header h1 { font-size: 20px; }
+  main { padding: 20px; }
 }
 
 header h1 {

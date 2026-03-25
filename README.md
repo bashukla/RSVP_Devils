@@ -1,22 +1,55 @@
-# Simple node.js restful api template app
-This is a simple template to get you started creating a web app with a restful api backend that connects to a mySQL database.
+# Sun Devil Central — Campus Event Discovery & RSVP Platform
+
+A web app for Arizona State University students to discover, create, and RSVP to campus events, with automated email reminders.
 
 ## Setup
-- open a terminal window and run: npm install
-- rename .env.example to .env and replace the placeholder values with your database credentials and a key of your choosing (share this information with your team so they can use the same credentials and key)
-- use mySQL Workbench to execute the DDL query found in the user_table_ddl.sql file against your database in order to create the user table needed for the template to run properly
-- run the template app from the terminal with: npm run dev
-- navigate to http://localhost:3000 to play with the app!
 
-## Basic Architecture
-- **server.js:** back-end routes that talk to the database.
-- **public/js/datamodel.js:** "model" that is responsible for sending data back and forth between the interface and the server, and for storing and managing data and state on the front end.
-- **public/dashboard.html:** "view" that represents what the user sees and interacts with in the browser.
-- **public/js/dashboard.js:** "controller" that responds to user interactions with the view, works with the model to send and receive data accordingly, and manipulates the DOM to change what the user sees in the view as a result.
+- Run `npm install` in the project root
+- Copy `.env.example` to `.env` and fill in your credentials:
+  - MySQL database connection details
+  - JWT secret key
+  - Email SMTP credentials (Gmail or Mailtrap for testing)
+- Run the DDL script in `user_table_ddl.sql` against your MySQL database to create the required tables
+- Start the app with `npm run dev`
+- Navigate to `http://localhost:3000`
 
-The files listed above are commented fairly extensively and organized with purpose.  The intent is for you to be able to use the existing code as a reference, and easily understand how to add your own code in the right places in order to create new features and therefore build your own app.
+## Environment Variables
+
+```
+DB_HOST=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+JWT_SECRET=
+EMAIL_HOST=
+EMAIL_PORT=
+EMAIL_USER=
+EMAIL_PASS=
+EMAIL_FROM=
+```
 
 ## Features
--MVC pattern for well-organized code
--Salted and hashed password management
--JWT tokens for secure authorization
+
+- JWT-based authentication with bcrypt password hashing
+- Browse, create, edit, and delete campus events
+- Filter events by category, location, and date
+- RSVP to events with confirmation email sent on registration
+- Cancel RSVP with automatic reminder deactivation
+- Automated email reminders sent 24 hours before events via cron job
+- Toggle reminders on/off per event from the reminders page
+- Email preview per reminder on the reminders page
+- Admin dashboard showing registered users
+- Only `.edu` email addresses can receive notifications
+
+## Email Testing
+
+For local development, use [Mailtrap](https://mailtrap.io) sandbox SMTP credentials in your `.env` to catch all outgoing emails without delivering to real inboxes.
+
+For production, swap in Gmail SMTP or any real email provider credentials — no code changes needed.
+
+## Architecture
+
+- `server.js` — Express backend, REST API routes, cron job, email logic
+- `public/js/` — Frontend controllers per page
+- `public/css/` — Page-specific stylesheets
+- `user_table_ddl.sql` — Database schema

@@ -7,8 +7,50 @@
     header {
       background-color: #8C1D40;
       color: white;
-      padding: 20px;
+      padding: 20px 30px;
       text-align: center;
+      position: relative;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .asu-logo {
+      height: 80px;
+      width: auto;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+    header h1 {
+      margin: 0 0 8px 0;
+      font-size: 26px;
+    }
+    header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 15px;
+    }
+    #logoutBtn {
+      background: transparent;
+      border: 2px solid #FFC627;
+      color: #FFC627;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    #logoutBtn:hover {
+      background: #FFC627;
+      color: #8C1D40;
+    }
+    @media (max-width: 600px) {
+      .asu-logo { height: 55px; }
+      header h1 { font-size: 18px; }
+      main { padding: 20px; }
     }
     main {
       padding: 40px;

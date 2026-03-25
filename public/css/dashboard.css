@@ -19,6 +19,18 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.asu-logo {
+    height: 50px;
+    width: auto;
+}
+
+@media (max-width: 600px) {
+    .container { width: 90%; }
+    .asu-logo { height: 35px; }
 }
 
 .header div {
