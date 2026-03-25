@@ -60,9 +60,9 @@ app.get('/rsvp.html', (req, res) => {
 app.get('/reminders.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'reminders.html'));
 });
-app.get('userSetting.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'userSetting.html'));
-})
+app.get('/userSettings.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'userSettings.html'));
+});
 
 
 //////////////////////////////////////
