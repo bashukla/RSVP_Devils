@@ -1,4 +1,3 @@
-
 // prevent multiple initializations
 let isCarouselInitialized = false;
 let isTransitioning = false;
@@ -80,9 +79,8 @@ function renderCarousel(events) {
             <p>${event.location}</p>
         `;
 
-        card.addEventListener('click', () => {
-            window.location.href = '/events.html';
-        });
+        // OPTIONAL: store id for future use
+        card.dataset.id = event.id;
 
         track.appendChild(card);
     });
@@ -93,11 +91,10 @@ function setupCarousel() {
     const track = document.getElementById('highlightCarousel');
 
     // hard reset to clear old clones/listeners
-    track.innerHTML = track.innerHTML; // forces DOM cleanup
+    track.innerHTML = track.innerHTML;
     track.style.transition = 'none';
 
     const slides = Array.from(track.children);
-
     if (slides.length === 0) return;
 
     currentIndex = 1;
@@ -107,9 +104,7 @@ function setupCarousel() {
     track.parentNode.replaceChild(newTrack, track);
 
     const freshTrack = document.getElementById('highlightCarousel');
-
     const freshSlides = Array.from(freshTrack.children);
-
     if (freshSlides.length === 0) return;
 
     // clone once per fresh setup
@@ -121,11 +116,19 @@ function setupCarousel() {
 
     freshTrack.style.transform = 'translateX(-100%)';
 
-    // attach ONE listener only
+    // transition handler
     freshTrack.addEventListener('transitionend', handleTransitionEnd);
 
+    // event delegation for card clicks 
+    freshTrack.addEventListener('click', (e) => {
+        const card = e.target.closest('.carousel-card');
+        if (card) {
+            window.location.href = '/events.html';
+        
+        }
+    });
+
     startAutoSlide();
-}
 
     // pause on hover
     const container = document.querySelector('.highlight-container');
@@ -137,6 +140,7 @@ function setupCarousel() {
         container.addEventListener('mouseenter', pauseAutoSlide);
         container.addEventListener('mouseleave', startAutoSlide);
     }
+}
 
 // handle seamless infinite loop reset
 function handleTransitionEnd() {
@@ -164,7 +168,6 @@ function handleTransitionEnd() {
         track.style.transform = `translateX(-${currentIndex * 100}%)`;
     }
 
-    // allow next move AFTER animation completes
     isTransitioning = false;
 }
 
@@ -172,7 +175,6 @@ function handleTransitionEnd() {
 function moveSlide(direction) {
     const track = document.getElementById('highlightCarousel');
 
-    // block if already animating
     if (isTransitioning) return;
 
     isTransitioning = true;
@@ -197,7 +199,7 @@ function pauseAutoSlide() {
     clearInterval(autoSlide);
 }
 
-// reset auto slide (used on button click)
+// reset auto slide
 function resetAutoSlide() {
     startAutoSlide();
 }
@@ -217,4 +219,3 @@ if (nextBtn && prevBtn) {
         resetAutoSlide();
     });
 }
-
