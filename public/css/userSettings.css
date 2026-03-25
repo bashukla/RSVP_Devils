@@ -1,0 +1,265 @@
+/* ── VARIABLES ── */
+:root {
+  --asu-maroon: #8C1D40;
+  --asu-gold:   #FFC627;
+  --asu-black:  #000000;
+  --light-gray: #f4f4f4;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--light-gray);
+  margin: 0;
+  color: #333;
+}
+
+/* ── NAVBAR ── */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--asu-maroon);
+  padding: 12px 20px;
+  color: white;
+}
+.logo {
+  font-weight: bold;
+  font-size: 18px;
+  color: var(--asu-gold);
+}
+.nav-right a {
+  color: white;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: 500;
+}
+.nav-right a:hover { text-decoration: underline; }
+
+/* ── CAMPUS BANNER ── */
+.campus-banner {
+  background-color: var(--asu-maroon);
+  border-bottom: 4px solid var(--asu-gold);
+  color: white;
+  padding: 20px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+}
+.campus-banner .asu-logo {
+  height: 60px;
+  width: auto;
+  background: white;
+  padding: 6px 10px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+.campus-banner .banner-text h1 {
+  margin: 0 0 4px 0;
+  font-size: 22px;
+  color: white;
+}
+.campus-banner .banner-text .subtitle {
+  color: rgba(255,255,255,0.85);
+  margin: 0;
+  font-size: 13px;
+}
+@media (max-width: 600px) {
+  .campus-banner { flex-direction: column; padding: 15px; }
+  .campus-banner .asu-logo { height: 45px; }
+  .campus-banner .banner-text h1 { font-size: 18px; }
+}
+
+/* ── PAGE LAYOUT ── */
+.settings-wrapper {
+  width: 90%;
+  max-width: 700px;
+  margin: 30px auto 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── SETTINGS CARD ── */
+.settings-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;         /* keeps child elements inside rounded corners */
+}
+.card-title {
+  background-color: var(--asu-maroon);
+  color: white;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border-bottom: 3px solid var(--asu-gold);
+  margin: 0;
+}
+.card-body { padding: 20px; }
+
+/* ── FORM GROUPS ── */
+.form-group { margin-bottom: 18px; }
+.form-group:last-child { margin-bottom: 0; }
+
+label {
+  display: block;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--asu-maroon);
+  margin-bottom: 6px;
+}
+
+/* All text/password/email inputs share the same style */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  font-size: 15px;
+  font-family: 'Roboto', sans-serif;
+  transition: border-color 0.2s;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  border-color: var(--asu-maroon);
+  outline: none;
+}
+
+/* Read-only email — looks like an input but isn't editable */
+.email-display {
+  display: block;
+  background-color: #f4f4f4;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  padding: 10px 14px;
+  font-size: 15px;
+  color: #555;
+  width: 100%;
+}
+
+/* ── CHANGE PASSWORD TOGGLE ── */
+.toggle-link {
+  background: none;
+  border: none;
+  color: var(--asu-maroon);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  font-family: 'Roboto', sans-serif;
+}
+.toggle-link:hover { color: #6a1530; }
+
+/* Hidden by default; JS adds .visible to show it */
+.password-section { display: none; margin-top: 16px; }
+.password-section.visible { display: block; }
+
+.password-hint {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* ── NOTIFICATION TOGGLE ROWS ── */
+.toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.toggle-row:last-of-type { border-bottom: none; }
+
+.toggle-label { font-size: 14px; color: #444; }
+.toggle-label span {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+/* ── TOGGLE SWITCH ── */
+/* The <label class="switch"> wraps a hidden checkbox + a styled span */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; } /* hide real checkbox */
+
+/* The visible track */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  border-radius: 26px;
+  transition: 0.3s;
+}
+/* The circular thumb */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px; width: 20px;
+  left: 3px; bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+/* When checkbox is checked: turn track maroon, slide thumb right */
+input:checked + .slider { background-color: var(--asu-maroon); }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* ── DANGER ZONE ── */
+.danger-card .card-title {
+  background-color: #c0392b;
+  border-bottom-color: #e74c3c;
+}
+.danger-text { font-size: 14px; color: #555; margin: 0 0 14px 0; }
+
+/* ── BUTTONS ── */
+button.btn {
+  padding: 11px 22px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+  transition: background-color 0.2s;
+}
+.btn-primary { background-color: var(--asu-gold); color: black; }
+.btn-primary:hover { background-color: #e6b422; }
+.btn-danger  { background-color: #e74c3c; color: white; }
+.btn-danger:hover  { background-color: #c0392b; }
+
+.save-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* ── BACK LINK ── */
+a.back-link {
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+  color: var(--asu-maroon);
+  font-weight: bold;
+  text-decoration: none;
+}
+a.back-link:hover { text-decoration: underline; }
+
+/* ── TOAST ── */
+/* Slides up from bottom when .show is added by

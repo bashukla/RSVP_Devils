@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Settings | RSVP Devils</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/test_CSS.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <span class="logo">RSVP Devils</span>
+    </div>
+    <div class="nav-right">
+      <a href="/index.html">Home</a>
+      <a href="/events.html">Events</a>
+      <a href="/reminders.html">Reminders</a>
+      <a href="/dashboard.html">Dashboard</a>
+    </div>
+  </nav>
+
+  <!-- CAMPUS BANNER -->
+  <div class="campus-banner">
+    <img src="./Images/asu-logo.png" alt="ASU Logo" class="asu-logo">
+    <div class="banner-text">
+      <h1>User Settings</h1>
+      <p class="subtitle">Manage your account preferences</p>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="settings-wrapper">
+
+    <!-- CARD 1: Account Info -->
+    <div class="settings-card">
+      <h2 class="card-title">Account Information</h2>
+      <div class="card-body">
+
+        <div class="form-group">
+          <label>Account Email</label>
+          <div class="email-display" id="accountEmail">student@asu.edu</div>
+        </div>
+
+        <div class="form-group">
+          <label>Display Name</label>
+          <input type="text" id="displayName" placeholder="Your name" value="Sun Devil">
+        </div>
+
+        <div class="form-group">
+          <button class="toggle-link" onclick="togglePasswordSection()">Change Password?</button>
+
+          <!-- Hidden by default, shown when button clicked -->
+          <div class="password-section" id="passwordSection">
+            <div class="form-group" style="margin-top:14px;">
+              <label>Current Password</label>
+              <input type="password" id="currentPassword" placeholder="Enter current password">
+            </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" id="newPassword" placeholder="Enter new password">
+              <p class="password-hint">At least 8 characters.</p>
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+          </div>
+        </div>
+
+        <div class="save-row">
+          <button class="btn btn-primary" onclick="saveAccountInfo()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2: Notification Preferences -->
+    <div class="settings-card">
+      <h2 class="card-title">Notification Preferences</h2>
+      <div class="card-body">
+
+        <div class="toggle-row">
+          <div class="toggle-label">
+            Event Reminders
+            <span>Get notified before events you've RSVP'd to</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleReminders" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <div class="toggle-label">
+            New Event Alerts
+            <span>Be the first to know about new campus events</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleNewEvents" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <div class="toggle-label">
+            RSVP Confirmations
+            <span>Receive confirmation emails when you RSVP</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleConfirmations">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="save-row">
+          <button class="btn btn-primary" onclick="saveNotifications()">Save Preferences</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 3: Danger Zone -->
+    <div class="settings-card danger-card">
+      <h2 class="card-title">Danger Zone</h2>
+      <div class="card-body">
+        <p class="danger-text">Deleting your account is permanent and cannot be undone.</p>
+        <button class="btn btn-danger" onclick="confirmDelete()">Delete My Account</button>
+      </div>
+    </div>
+
+    <a href="/dashboard.html" class="back-link">← Back to Dashboard</a>
+
+  </div><!-- /.settings-wrapper -->
+
+  <!-- TOAST NOTIFICATION (hidden until triggered) -->
+  <div id="toast"></div>
+
+  <script src="js/userSetting.js"></script>
+</body>
