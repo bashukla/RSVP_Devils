@@ -20,12 +20,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 // logout button functionality
 const logoutBtn = document.getElementById('logoutBtn');
 
-if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('jwtToken');
-        window.location.href = '/logon.html';
-    });
-}
+logoutBtn.addEventListener('click', async () => {
+    const confirm = await showConfirm('Are you sure you want to logout?');
+    if(!confirm) return;
+    localStorage.clear('jwtToken');
+    window.location = '/logon.html';
+});
 
 // load highlighted events
 async function loadHighlightedEvents() {
@@ -218,4 +218,63 @@ if (nextBtn && prevBtn) {
         moveSlide(-1);
         resetAutoSlide();
     });
+}
+// Custom Popup
+const popup = document.createElement('div');
+popup.id = 'customPopup';
+popup.className = 'hidden';
+popup.innerHTML = `
+  <div class="popup-content">
+    <div class="popup-top-border" id="popupBorder"></div>
+    <div class="popup-icon" id="popupIcon"></div>
+    <div class="popup-message" id="popupMessage"></div>
+    <div class="popup-buttons" id="popupButtons"></div>
+  </div>
+`;
+document.body.appendChild(popup);
+
+const popupBorder  = document.getElementById('popupBorder');
+const popupIcon    = document.getElementById('popupIcon');
+const popupMessage = document.getElementById('popupMessage');
+const popupButtons = document.getElementById('popupButtons');
+
+// Show error or success (auto-closes after 3s)
+function showPopup(type, message) {
+  popupBorder.className  = `popup-top-border ${type}`;
+  popupIcon.textContent  = type === 'error' ? '❌' : '✅';
+  popupMessage.textContent = message;
+  popupButtons.innerHTML = '';
+  popup.classList.remove('hidden');
+  setTimeout(() => popup.classList.add('hidden'), 3000);
+}
+
+// Show confirmation dialog, returns a Promise<boolean>
+function showConfirm(message) {
+  return new Promise(resolve => {
+    popupBorder.className    = 'popup-top-border confirm';
+    popupIcon.textContent    = '⚠️';
+    popupMessage.textContent = message;
+    popupButtons.innerHTML   = '';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = 'Confirm';
+    confirmBtn.className   = 'popup-btn-danger';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.className   = 'popup-btn-cancel';
+
+    confirmBtn.addEventListener('click', () => {
+      popup.classList.add('hidden');
+      resolve(true);
+    });
+    cancelBtn.addEventListener('click', () => {
+      popup.classList.add('hidden');
+      resolve(false);
+    });
+
+    popupButtons.appendChild(confirmBtn);
+    popupButtons.appendChild(cancelBtn);
+    popup.classList.remove('hidden');
+  });
 }

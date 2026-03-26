@@ -102,3 +102,104 @@ h1 {
   .nav-right a:hover {
     text-decoration: underline;
   }
+  /* ── CUSTOM POPUP ── */
+#customPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease;
+}
+
+#customPopup.hidden {
+    display: none;
+}
+
+#customPopup .popup-content {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    text-align: center;
+    animation: slideDown 0.3s ease;
+    font-family: 'Roboto', sans-serif;
+}
+
+#customPopup .popup-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+#customPopup .popup-message {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+#customPopup .popup-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+#customPopup .popup-top-border {
+    height: 6px;
+    margin: -2rem -2rem 1.5rem -2rem;
+    border-radius: 10px 10px 0 0;
+}
+
+#customPopup .popup-top-border.error   { background-color: #E74C3C; }
+#customPopup .popup-top-border.success { background-color: #28a745; }
+#customPopup .popup-top-border.confirm { background-color: var(--asu-maroon); }
+
+#customPopup .popup-btn-confirm {
+    background-color: var(--asu-gold);
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#customPopup .popup-btn-cancel {
+    background-color: #ccc;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#customPopup .popup-btn-cancel:hover { background-color: #999; }
+
+#customPopup .popup-btn-danger {
+    background-color: #E74C3C;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#customPopup .popup-btn-danger:hover { background-color: #c0392b; }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
