@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //////////////////////////////////////////
     // Log out and redirect to login
     logoutButton.addEventListener('click', () => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('jwtToken');
         window.location.href = '/logon.html';
     });
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //CODE THAT NEEDS TO RUN IMMEDIATELY AFTER PAGE LOADS
     //////////////////////////////////////////////////////
     // Initial check for the token
-    const token = localStorage.getItem('jwtToken');
+    const token = localStorage.getItem('jwtoken');
     if (!token) {
         window.location.href = '/logon.html';
     } else {

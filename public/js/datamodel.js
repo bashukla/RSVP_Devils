@@ -44,7 +44,7 @@ const DataModel = (function () {
                     method: 'GET',
                     headers: {
                         // we need to send the token in the headers
-                        'Authorization': token,
+                        'Authorization': 'Bearer' + token,
                         'Content-Type': 'application/json',
                     },
                 });

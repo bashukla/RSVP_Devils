@@ -85,41 +85,30 @@ async function createConnection() {
 
 // **Authorization API Middleware: Verify JWT Token and Check User in Database**
 async function authenticateToken(req, res, next) {
-
     const authHeader = req.headers['authorization'];
 
-    if (!authHeader) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
-    }
+    // 🔍 Log the full header
+    console.log("AUTH HEADER:", authHeader);
 
-    const token = authHeader.split(' ')[1]; // removes "Bearer "
+    const token = authHeader && authHeader.split(' ')[1];
 
-    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+    // 🔍 Log extracted token
+    console.log("TOKEN:", token);
+
+    if (!token) return res.sendStatus(401);
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) {
-            return res.status(403).json({ message: 'Invalid token.' });
+            console.log("JWT ERROR:", err.message); // 🔍 very useful
+            return res.status(403).json({ message: "Invalid token." });
         }
 
-        try {
-            const connection = await createConnection();
+        req.user = user;
 
-            const [rows] = await connection.execute(
-                'SELECT email FROM user WHERE email = ?',
-                [decoded.email]
-            );
+        // 🔍 Confirm decoded payload
+        console.log("DECODED USER:", user);
 
-            await connection.end();
-
-            if (rows.length === 0) {
-                return res.status(403).json({ message: 'Account not found or deactivated.' });
-            }
-
-            req.user = decoded;
-            next();
-
-        } catch (dbError) {
-            console.error(dbError);
-            res.status(500).json({ message: 'Database error during authentication.' });
-        }
+        next();
     });
 }
 
@@ -266,21 +255,47 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Route: Get All Email Addresses
-app.get('/api/users', authenticateToken, async (req, res) => {
-    try {
-        const connection = await createConnection();
+function authenticateToken(req, res, next) {
 
-        const [rows] = await connection.execute('SELECT email FROM user');
+    const authHeader = req.headers['authorization'];
+    
 
-        await connection.end();  // Close connection
-
-        const emailList = rows.map((row) => row.email);
-        res.status(200).json({ emails: emailList });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error retrieving email addresses.' });
+    if (!authHeader) {
+        return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
-});
+
+    const token = authHeader.split(' ')[1]; // removes "Bearer "
+
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+        if (err) {
+            return res.status(403).json({ message: 'Invalid token.' });
+        }
+
+        try {
+            const connection = await createConnection();
+
+            const [rows] = await connection.execute(
+                'SELECT email FROM user WHERE email = ?',
+                [decoded.email]
+            );
+
+            await connection.end();
+
+            if (rows.length === 0) {
+                return res.status(403).json({ message: 'Account not found or deactivated.' });
+            }
+
+            req.user = decoded;
+            next();
+
+        } catch (dbError) {
+            console.error(dbError);
+            res.status(500).json({ message: 'Database error during authentication.' });
+        }
+    });
+    console.log("HEADER:", req.headers['authorization']);
+    
+}
 
 // Route Get All Events 
 app.get('/api/events', async (req, res) => {
@@ -792,6 +807,58 @@ app.post('/api/reminders/toggle', authenticateToken, async (req, res) => {
         res.status(500).json({ message: 'Error toggling reminder' });
     }
 });
+// Route: Change Password
+app.post('/api/change-password', authenticateToken, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    // Validate inputs
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: 'Current and new password are required.' });
+    }
+
+    if (newPassword.length < 8) {
+        return res.status(400).json({ message: 'New password must be at least 8 characters.' });
+    }
+
+    let connection;
+    try {
+        connection = await createConnection();
+
+        // Get the user's current hashed password from the database
+        const [rows] = await connection.execute(
+            'SELECT password FROM user WHERE email = ?',
+            [req.user.email]  // email comes from the JWT token via authenticateToken
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Check if current password matches what's in the database
+        const isMatch = await bcrypt.compare(currentPassword, rows[0].password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Current password is incorrect.' });
+        }
+
+        // Hash the new password
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update the password in the database
+        await connection.execute(
+            'UPDATE user SET password = ? WHERE email = ?',
+            [hashedNewPassword, req.user.email]
+        );
+
+        res.status(200).json({ message: 'Password changed successfully.' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error changing password.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+    console.log("USER:", req.user);
+});
 //////////////////////////////////////
 //END ROUTES TO HANDLE API REQUESTS
 //////////////////////////////////////
@@ -831,6 +898,69 @@ cron.schedule('0 * * * *', async () => {
         }
     } catch (error) {
         console.error('Cron job error:', error);
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+// Route: Delete Account
+app.delete('/api/delete-account', authenticateToken, async (req, res) => {
+    let connection;
+    try {
+        connection = await createConnection();
+
+        // 1. Get user_id first
+        const [userRows] = await connection.execute(
+            'SELECT user_id FROM user WHERE email = ?',
+            [req.user.email]
+        );
+
+        if (userRows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        const userId = userRows[0].user_id;
+
+        // 2. Delete registrations for events this user created
+        await connection.execute(`
+            DELETE FROM registration WHERE event_id IN 
+            (SELECT event_id FROM events WHERE created_by = ?)
+        `, [userId]);
+
+        // 3. Delete reminders for events this user created
+        await connection.execute(`
+            DELETE FROM user_reminders WHERE event_id IN 
+            (SELECT event_id FROM events WHERE created_by = ?)
+        `, [userId]);
+
+        // 4. Delete the user's own registrations
+        await connection.execute(
+            'DELETE FROM registration WHERE user_id = ?', 
+            [userId]
+        );
+
+        // 5. Delete the user's own reminders
+        await connection.execute(
+            'DELETE FROM user_reminders WHERE user_id = ?', 
+            [userId]
+        );
+
+        // 6. Delete events the user created
+        await connection.execute(
+            'DELETE FROM events WHERE created_by = ?', 
+            [userId]
+        );
+
+        // 7. Finally delete the user
+        await connection.execute(
+            'DELETE FROM user WHERE user_id = ?', 
+            [userId]
+        );
+
+        res.status(200).json({ message: 'Account deleted successfully.' });
+
+    } catch (error) {
+        console.error('Delete account error:', error);
+        res.status(500).json({ message: 'Error deleting account.' });
     } finally {
         if (connection) await connection.end();
     }

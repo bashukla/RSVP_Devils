@@ -414,7 +414,7 @@ modalForm.addEventListener('submit', async e => {
 
 // Delete modal button
 deleteBtn.addEventListener('click', async () => {
-    const token = localStorage.getItem("jwtToken");
+    const token = localStorage.getItem("Token");
     if (!token) return showPopup('error', 'Login required');
     if (!selectedEventId) return;
     const confirmed = await showConfirm('Are you sure you want to delete this event?');

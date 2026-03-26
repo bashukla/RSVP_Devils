@@ -1,51 +1,167 @@
-// Show/hide the password fields when "Change Password?" is clicked
+const token = localStorage.getItem('jwtToken');
+
+// ── POPUP SYSTEM (matches events.js) ──────────────────────
+const popup = document.createElement('div');
+popup.id = 'customPopup';
+popup.className = 'hidden';
+popup.innerHTML = `
+  <div class="popup-content">
+    <div class="popup-top-border" id="popupBorder"></div>
+    <div class="popup-icon" id="popupIcon"></div>
+    <div class="popup-message" id="popupMessage"></div>
+    <div class="popup-buttons" id="popupButtons"></div>
+  </div>
+`;
+document.body.appendChild(popup);
+
+const popupBorder  = document.getElementById('popupBorder');
+const popupIcon    = document.getElementById('popupIcon');
+const popupMessage = document.getElementById('popupMessage');
+const popupButtons = document.getElementById('popupButtons');
+
+function showPopup(type, message) {
+    popupBorder.className    = `popup-top-border ${type}`;
+    popupIcon.textContent    = type === 'error' ? '❌' : '✅';
+    popupMessage.textContent = message;
+    popupButtons.innerHTML   = '';
+    popup.classList.remove('hidden');
+    setTimeout(() => popup.classList.add('hidden'), 3000);
+}
+
+function showConfirm(message) {
+    return new Promise(resolve => {
+        popupBorder.className    = 'popup-top-border confirm';
+        popupIcon.textContent    = '⚠️';
+        popupMessage.textContent = message;
+        popupButtons.innerHTML   = '';
+
+        const confirmBtn = document.createElement('button');
+        confirmBtn.textContent = 'Confirm';
+        confirmBtn.className   = 'popup-btn-danger';
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.className   = 'popup-btn-cancel';
+
+        confirmBtn.addEventListener('click', () => {
+            popup.classList.add('hidden');
+            resolve(true);
+        });
+        cancelBtn.addEventListener('click', () => {
+            popup.classList.add('hidden');
+            resolve(false);
+        });
+
+        popupButtons.appendChild(confirmBtn);
+        popupButtons.appendChild(cancelBtn);
+        popup.classList.remove('hidden');
+    });
+}
+
+// ── EMAIL DISPLAY ──────────────────────────────────────────
+function getEmailFromToken() {
+    try {
+        const payload = token.split('.')[1];
+        const decoded = JSON.parse(atob(payload));
+        return decoded.email;
+    } catch (e) {
+        return 'Unable to load email';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('accountEmail').textContent = getEmailFromToken();
+});
+
+// ── PASSWORD SECTION TOGGLE ────────────────────────────────
 function togglePasswordSection() {
-  const section = document.getElementById('passwordSection');
-  section.classList.toggle('visible'); // adds or removes the class
+    const section = document.getElementById('passwordSection');
+    section.classList.toggle('visible');
 }
 
-// Slide a toast message up from the bottom, then hide it
-function showToast(message, duration = 3000) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), duration);
-}
-
-// Validate and save account info
+// ── SAVE ACCOUNT / CHANGE PASSWORD ────────────────────────
 function saveAccountInfo() {
-  const newPass     = document.getElementById('newPassword').value;
-  const confirmPass = document.getElementById('confirmPassword').value;
-  const section     = document.getElementById('passwordSection');
+    const currentPass = document.getElementById('currentPassword').value;
+    const newPass     = document.getElementById('newPassword').value;
+    const confirmPass = document.getElementById('confirmPassword').value;
+    const section     = document.getElementById('passwordSection');
 
-  // Only validate passwords if the section is open
-  if (section.classList.contains('visible')) {
-    if (newPass && newPass !== confirmPass) {
-      showToast('⚠️ Passwords do not match.');
-      return; // stop here, don't save
-    }
-    if (newPass && newPass.length < 8) {
-      showToast('⚠️ Password must be at least 8 characters.');
-      return;
-    }
-  }
+    if (section.classList.contains('visible')) {
+        if (!currentPass) {
+            showPopup('error', 'Please enter your current password.');
+            return;
+        }
+        if (!newPass) {
+            showPopup('error', 'Please enter a new password.');
+            return;
+        }
+        if (newPass.length < 8) {
+            showPopup('error', 'Password must be at least 8 characters.');
+            return;
+        }
+        if (newPass !== confirmPass) {
+            showPopup('error', 'Passwords do not match.');
+            return;
+        }
 
-  // If all checks pass:
-  showToast('✅ Account info saved successfully!');
+        fetch('/api/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ currentPassword: currentPass, newPassword: newPass })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.message === 'Password changed successfully.') {
+                showPopup('success', 'Password changed successfully!');
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+                document.getElementById('passwordSection').classList.remove('visible');
+            } else {
+                showPopup('error', data.message);
+            }
+        })
+        .catch(() => showPopup('error', 'Error connecting to server.'));
+
+        return;
+    }
+
+    showPopup('success', 'Account info saved successfully!');
 }
 
-// Save notification toggle states
+// ── NOTIFICATIONS ──────────────────────────────────────────
 function saveNotifications() {
-  showToast('✅ Notification preferences updated!');
+    showPopup('success', 'Notification preferences updated!');
 }
 
-// Confirm before deleting account
-function confirmDelete() {
-  const confirmed = confirm(
-    'Are you sure you want to permanently delete your account? This cannot be undone.'
-  );
-  if (confirmed) {
-    showToast('Account deletion requested. Goodbye! 👋');
-    // TODO: call your backend delete endpoint here
-  }
+// ── DELETE ACCOUNT ─────────────────────────────────────────
+async function confirmDelete() {
+    const confirmed = await showConfirm(
+        'Are you sure you want to permanently delete your account? This cannot be undone.'
+    );
+    if (!confirmed) return;
+
+    try {
+        const resp = await fetch('/api/delete-account', {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        const data = await resp.json();
+
+        if (resp.ok) {
+            showPopup('success', 'Account deleted. Goodbye!');
+            setTimeout(() => {
+                localStorage.clear();
+                window.location.href = '/logon.html';
+            }, 2000);
+        } else {
+            showPopup('error', data.message);
+        }
+    } catch (error) {
+        showPopup('error', 'Error connecting to server.');
+    }
 }
