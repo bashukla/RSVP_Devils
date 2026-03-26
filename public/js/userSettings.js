@@ -165,3 +165,44 @@ async function confirmDelete() {
         showPopup('error', 'Error connecting to server.');
     }
 }
+//Fetch account creation
+document.addEventListener("DOMContentLoaded", loadUserInfo);
+
+async function loadUserInfo() {
+    const token = localStorage.getItem("jwtToken");
+
+    if (!token) {
+        console.error("No token found");
+        return;
+    }
+
+    try {
+        const resp = await fetch('/api/user-info', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!resp.ok) throw new Error("Failed to fetch user info");
+
+        const data = await resp.json();
+
+        // 👇 THIS is where you update UI
+        displayUserInfo(data);
+
+    } catch (err) {
+        console.error("Error loading user info:", err);
+    }
+}
+function displayUserInfo(user) {
+    const createdE1 = document.getElementById("creationDisplay");
+
+    //Date Format code
+    const date = new Date(user.created_at);
+    const formatted = date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    createdE1.textContent = formatted;
+}

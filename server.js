@@ -965,6 +965,30 @@ app.delete('/api/delete-account', authenticateToken, async (req, res) => {
         if (connection) await connection.end();
     }
 });
+//Get User account creation
+app.get('/api/user-info', authenticateToken, async (req, res) => {
+    let connection;
+    try {
+        connection = await createConnection();
+
+        const [rows] = await connection.execute(
+            'SELECT email, created_at FROM user WHERE email = ?',
+            [req.user.email]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json(rows[0]);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error fetching user info' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
 
 // Start the server
 app.listen(port, () => {
