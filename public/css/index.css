@@ -116,7 +116,7 @@ html, body {
 .carousel-card {
   min-width: 100%;           
   box-sizing: border-box;
-  padding: 40px 20px;
+  padding: 0px 20px;
   border-radius: 12px;
   cursor: pointer;
 
@@ -125,6 +125,19 @@ html, body {
 
   background: rgba(255, 255, 255, 0);
   transition: transform 0.3s, background 0.3s;
+}
+
+.event-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.carousel-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 /* hover effect */
