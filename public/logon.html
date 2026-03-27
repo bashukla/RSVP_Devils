@@ -7,12 +7,17 @@
     <title>Log In</title>
     <link rel="stylesheet" href="css/logon.css">
     <link rel="stylesheet" href="css/DarkTheme.css">
+    <script src="js/theme-toggle.js"></script>
 </head>
 
 <body>
     <div class="container">
     <img src="/images/asu-logo-small.png" alt="ASU Logo" class="asu-logo">
         <h1>Welcome to The Devils</h1>
+         <div class="nav-right">
+            <button id="theme-toggle-btn">🌙 Dark Mode</button>
+            <div class="hamburger" onclick="toggleMenu()"></div>
+        </div>
         <div class="tab">
             <button class="tab-button active" id="login-tab">Log In</button>
             <button class="tab-button" id="create-account-tab">Create Account</button>

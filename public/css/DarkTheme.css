@@ -218,3 +218,46 @@
   background-color: #f4f4f4;
   color: #1a1a1a;
 }
+/* ===== LOGON PAGE DARK MODE OVERRIDES ===== */
+
+:root.dark body {
+  background-color: #1a1a1a !important;
+}
+
+:root.dark .container {
+  background-color: #2a2a2a;
+  color: #f4f4f4;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+:root.dark h1 {
+  color: #f4f4f4;
+}
+
+:root.dark label {
+  color: #ccc;
+}
+
+:root.dark input {
+  background-color: #333;
+  color: #f4f4f4;
+  border-color: #555;
+}
+
+:root.dark input::placeholder {
+  color: #777;
+}
+
+:root.dark .tab-button {
+  background-color: #444;
+  color: #ccc;
+}
+
+:root.dark .tab-button.active {
+  background-color: #8C1D40;
+  color: white;
+}
+
+:root.dark .message {
+  color: #ccc;
+}
