@@ -100,6 +100,8 @@ modal.innerHTML = `
       <input id="location" type="text" placeholder="Event location" required>
       <label>Tags</label>
       <input id="tags" type="text" placeholder="(Optional)">
+      <label>Event Image</label>
+      <input type="file" id="eventImageInput" accept="image/*">
       <div class="modal-buttons">
         <button type="submit" id="saveEventBtn">Save</button>
         <button type="button" id="deleteEventBtn" style="background-color: #E74C3C; color: #fff; display:none;">Delete</button>
@@ -114,6 +116,8 @@ const modalForm = document.getElementById('eventForm');
 const modalTitle = document.getElementById('modalTitle');
 const closeBtn = document.getElementById('closeModalBtn');
 const deleteBtn = document.getElementById('deleteEventBtn');
+const eventImageInput = document.getElementById('eventImageInput');
+
 
 closeBtn.addEventListener('click', () => {
     modal.classList.add('hidden');
@@ -234,7 +238,9 @@ function renderEvents(events) {
             <span class="delete-icon" title="Delete Event" data-id="${event.event_id}">&#128465;</span>
             </div>
         </div>
+
         <div class="card-body">
+          <img src="${event.image ? `/images/uploads/${event.image}` : '/images/Arizona-State-Sun-Devils-logo.png'}" class="event-image">
             <h3 class="event-title">${event.description}</h3>
             <div class="event-details"><strong>Date:</strong> ${dateStr}</div>
             <div class="event-details"><strong>Time:</strong> ${timeStr}</div>
@@ -242,6 +248,7 @@ function renderEvents(events) {
             <div class="event-details"><strong>RSVPs:</strong> ${event.rsvp_count}</div>
             ${event.tags ? `<div class="event-details"><strong>Tag(s):</strong> ${event.tags}</div>` : ''}
         </div>
+
         <div class="card-actions">
             <button 
                 class="rsvp-button ${isRsvped ? 'rsvped' : ''} ${isPast ? 'disabled' : ''}" 
@@ -264,6 +271,7 @@ function renderEvents(events) {
 
 // Attach listeners 
 function attachCardListeners(token) {
+
     document.querySelectorAll('.edit-icon').forEach(icon => {
         icon.addEventListener('click', () => {
             const eventId = icon.dataset.id;
@@ -273,28 +281,28 @@ function attachCardListeners(token) {
     });
 
     document.querySelectorAll('.delete-icon').forEach(icon => {
-    icon.addEventListener('click', async () => {
-        const eventId = icon.dataset.id;
-        const token = localStorage.getItem('jwtToken');
-        if (!token) return showPopup('error', 'Sorry, but you must be logged in to continue');
-        
-        const confirmed = await showConfirm('Are you sure you want to delete this event?');
-        if (!confirmed) return;
+        icon.addEventListener('click', async () => {
+            const eventId = icon.dataset.id;
+            const token = localStorage.getItem('jwtToken');
+            if (!token) return showPopup('error', 'Sorry, but you must be logged in to continue');
+            
+            const confirmed = await showConfirm('Are you sure you want to delete this event?');
+            if (!confirmed) return;
 
-        try {
-            const resp = await fetch(`/api/events/${eventId}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (!resp.ok) throw new Error('Failed to delete');
-            await loadEvents(token);
-            showPopup('success', 'Event deleted successfully!');
-        } catch (err) {
-            console.error(err);
-            showPopup('error', 'Sorry, we are unable to delete event');
-        }
+            try {
+                const resp = await fetch(`/api/events/${eventId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!resp.ok) throw new Error('Failed to delete');
+                await loadEvents(token);
+                showPopup('success', 'Event deleted successfully!');
+            } catch (err) {
+                console.error(err);
+                showPopup('error', 'Sorry, we are unable to delete event');
+            }
+        });
     });
-});
 
     document.querySelectorAll('.rsvp-button').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -324,6 +332,7 @@ function attachCardListeners(token) {
 
                 const data = await resp.json();
                 if (!resp.ok) throw new Error(data.message || 'RSVP failed');
+
                 if (isRsvped) {
                     userRSVPs = userRSVPs.filter(id => id !== eventId);
                     showPopup('success', 'RSVP cancelled successfully!');
@@ -335,6 +344,44 @@ function attachCardListeners(token) {
                 await loadEvents(token);
             } catch (err) {
                 console.error('RSVP Error:', err);
+                showPopup('error', err.message);
+            }
+        });
+    });
+            // Image upload handler
+    document.querySelectorAll('.image-upload').forEach(input => {
+        input.addEventListener('change', async () => {
+            const file = input.files[0];
+            if (!file) return;
+
+            const eventId = input.dataset.id;
+            const token = localStorage.getItem('jwtToken');
+
+            if (!token) {
+                showPopup('error', 'Login required to upload image');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const resp = await fetch(`/api/events/${eventId}/upload-cover`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.message || 'Upload failed');
+
+                showPopup('success', 'Image uploaded successfully!');
+                await loadEvents(token);
+
+            } catch (err) {
+                console.error('Upload error:', err);
                 showPopup('error', err.message);
             }
         });
@@ -375,36 +422,40 @@ modalForm.addEventListener('submit', async e => {
     const token = localStorage.getItem("jwtToken");
     if (!token) return showPopup('error','Login required');
 
-    const payload = {
-        description: document.getElementById('description').value,
-        type: document.getElementById('type').value,
-        event_datetime: document.getElementById('event_datetime').value,
-        location: document.getElementById('location').value,
-        tags: document.getElementById('tags').value.trim() || null
-    };
+    const formData = new FormData();
+    formData.append('description', document.getElementById('description').value);
+    formData.append('type', document.getElementById('type').value);
+    formData.append('event_datetime', document.getElementById('event_datetime').value);
+    formData.append('location', document.getElementById('location').value);
+    formData.append('tags', document.getElementById('tags').value.trim() || '');
+
+    // Add image if present
+    const imageFile = document.getElementById('eventImageInput').files[0];
+    if (imageFile) formData.append('image', imageFile);
 
     try {
         let resp;
         if (selectedEventId) {
             resp = await fetch(`/api/events/${selectedEventId}`, {
                 method: 'PUT',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                headers: { 'Authorization': `Bearer ${token}` }, // remove Content-Type
+                body: formData
             });
         } else {
             resp = await fetch(`/api/events`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                headers: { 'Authorization': `Bearer ${token}` }, // remove Content-Type
+                body: formData
             });
         }
 
         if (!resp.ok) throw new Error('Failed to save event');
-            modal.classList.add('hidden');
-            modalForm.reset();
-            showPopup('success', selectedEventId ? 'Event updated successfully!' : 'Event created successfully!');
-            selectedEventId = null;
-            await loadEvents(token);
+
+        modal.classList.add('hidden');
+        modalForm.reset();
+        showPopup('success', selectedEventId ? 'Event updated successfully!' : 'Event created successfully!');
+        selectedEventId = null;
+        await loadEvents(token);
 
     } catch (err) {
         console.error(err);
@@ -414,9 +465,11 @@ modalForm.addEventListener('submit', async e => {
 
 // Delete modal button
 deleteBtn.addEventListener('click', async () => {
-    const token = localStorage.getItem("Token");
+    const token = localStorage.getItem("jwtToken"); // ✅ FIXED
     if (!token) return showPopup('error', 'Login required');
+    
     if (!selectedEventId) return;
+
     const confirmed = await showConfirm('Are you sure you want to delete this event?');
     if (!confirmed) return;
 
@@ -426,10 +479,12 @@ deleteBtn.addEventListener('click', async () => {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!resp.ok) throw new Error('Failed to delete event');
+
         modal.classList.add('hidden');
         modalForm.reset();
         selectedEventId = null;
         await loadEvents(token);
+
         showPopup('success', 'Event deleted successfully!');
     } catch (err) {
         console.error(err);

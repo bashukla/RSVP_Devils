@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2/promise');
@@ -6,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
+const upload = require('./storage');
 // EMAIL TRANSPORTER CONFIGURATION
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
@@ -23,10 +25,12 @@ const port = 3000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+
 // Serve static files from the "public" folder
 app.use('/css', express.static('public/css'));
 app.use('/js', express.static('public/js'));
-app.use('/images', express.static('public/images'));
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+
 
 // Public login page
 app.get(['/', '/logon.html'], (req, res) => {
@@ -85,7 +89,7 @@ async function createConnection() {
 
 // **Authorization API Middleware: Verify JWT Token and Check User in Database**
 async function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
+    const authHeader = req.headers['authorization']; 
 
     // 🔍 Log the full header
     console.log("AUTH HEADER:", authHeader);
@@ -293,7 +297,7 @@ function authenticateToken(req, res, next) {
             res.status(500).json({ message: 'Database error during authentication.' });
         }
     });
-    console.log("HEADER:", req.headers['authorization']);
+    
     
 }
 
@@ -382,96 +386,162 @@ app.get('/api/events/type', authenticateToken, async (req, res) => {
 });
 
 // Route: Create Event
-app.post('/api/events', authenticateToken, async (req, res) => {
+app.post(
+  '/api/events',
+  authenticateToken,
+  upload.single('image'),
+  async (req, res) => {
+
+        console.log("ROUTE HIT: /api/events");
+
     const { type, description, event_datetime, location, tags } = req.body;
 
     if (!type || !description || !event_datetime || !location) {
-        return res.status(400).json({ message: 'All fields are required.' });
+      return res.status(400).json({ message: 'All fields are required.' });
     }
 
     try {
-        const connection = await createConnection();
+      const connection = await createConnection();
 
-        // Get user_id from logged in user
-        const [userRows] = await connection.execute(
-            'SELECT user_id FROM user WHERE email = ?',
-            [req.user.email]
-        );
+      const [userRows] = await connection.execute(
+        'SELECT user_id FROM user WHERE email = ?',
+        [req.user.email]
+      );
 
-        const userId = userRows[0].user_id;
+      const userId = userRows[0].user_id;
 
-        // Insert event
-        const [result] = await connection.execute(
-            `INSERT INTO events (type, description, event_datetime, location, created_by, tags)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            [type, description, event_datetime, location, userId, tags?.trim() || null]
-        );
+      const imageFilename = req.file ? req.file.filename : null;
 
-        await connection.end();
+      const [result] = await connection.execute(
+        `INSERT INTO events (type, description, event_datetime, location, created_by, tags, image)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [type, description, event_datetime, location, userId, tags?.trim() || null, imageFilename]
+      );
 
-        res.status(201).json({
-            message: 'Event created successfully',
-            event_id: result.insertId
-        });
+      await connection.end();
+
+      res.status(201).json({
+        message: 'Event created successfully',
+        event_id: result.insertId,
+        image: imageFilename
+      });
 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error creating event.' });
-    }
-});
+      console.error(error);
+      res.status(500).json({ message: 'Error creating event.' });
 
-// Route: Update Event
-app.put('/api/events/:id', authenticateToken, async (req, res) => {
+      console.log("FILE:", req.file);
+    }
+  }
+);
+
+// Route: Update Event 
+app.put(
+  '/api/events/:id',
+  authenticateToken,
+  upload.single('image'),
+  async (req, res) => {
+
     const { type, description, event_datetime, location, tags } = req.body;
     const eventId = req.params.id;
 
     if (!type || !description || !event_datetime || !location) {
-        return res.status(400).json({ message: 'All fields are required.' });
+      return res.status(400).json({ message: 'All fields are required.' });
     }
 
     try {
-        const connection = await createConnection();
+      const connection = await createConnection();
 
-        const [result] = await connection.execute(
-            `UPDATE events 
-             SET type = ?, description = ?, event_datetime = ?, location = ?, tags = ?
-             WHERE event_id = ?`,
-            [type, description, event_datetime, location, tags?.trim() || null, eventId]
-        );
+      // Get current image
+      const [existingRows] = await connection.execute(
+        'SELECT image FROM events WHERE event_id = ?',
+        [eventId]
+      );
 
+      if (existingRows.length === 0) {
         await connection.end();
+        return res.status(404).json({ message: 'Event not found.' });
+      }
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Event not found.' });
-        }
+      const currentImage = existingRows[0].image;
 
-        res.json({ message: 'Event updated successfully.' });
+      // If new image uploaded, use it; otherwise keep existing
+      const newImageFilename = req.file ? req.file.filename : currentImage;
+
+      const [result] = await connection.execute(
+        `UPDATE events 
+         SET type = ?, description = ?, event_datetime = ?, location = ?, tags = ?, image = ?
+         WHERE event_id = ?`,
+        [
+          type,
+          description,
+          event_datetime,
+          location,
+          tags?.trim() || null,
+          newImageFilename,
+          eventId
+        ]
+      );
+
+      await connection.end();
+
+      if (req.file && currentImage) {
+        const fs = require('fs');
+        const path = require('path');
+
+        const oldPath = path.join(__dirname, 'public', 'Images', 'uploads', currentImage);
+
+        fs.unlink(oldPath, err => {
+          if (err) console.log("Old image deletion failed:", err.message);
+        });
+      }
+
+      res.json({
+        message: 'Event updated successfully.',
+        image: newImageFilename
+      });
 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error updating event.' });
+      console.error(error);
+      res.status(500).json({ message: 'Error updating event.' });
     }
-});
+  }
+);
 
 // Route: Delete Event
+
+const fs = require('fs');
 app.delete('/api/events/:id', authenticateToken, async (req, res) => {
     const eventId = req.params.id;
 
     try {
         const connection = await createConnection();
 
-        // 1. Delete RSVPs (dependent table)
+        // 1. Get image filename BEFORE deleting event
+        const [rows] = await connection.execute(
+            'SELECT image FROM events WHERE event_id = ?',
+            [eventId]
+        );
+
+        if (rows.length === 0) {
+            await connection.end();
+            return res.status(404).json({ message: 'Event not found.' });
+        }
+
+        const imageFilename = rows[0].image;
+
+        // 2. Delete dependent tables
         await connection.execute(
             'DELETE FROM registration WHERE event_id = ?',
             [eventId]
         );
 
-        // 2. Delete reminders (dependent table)
         await connection.execute(
             'DELETE FROM user_reminders WHERE event_id = ?',
             [eventId]
         );
 
+        // 3. Delete event
         const [result] = await connection.execute(
             'DELETE FROM events WHERE event_id = ?',
             [eventId]
@@ -481,6 +551,25 @@ app.delete('/api/events/:id', authenticateToken, async (req, res) => {
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Event not found.' });
+        }
+
+        // 4. Delete image file from server (if exists)
+        if (imageFilename) {
+            const imagePath = path.join(
+                __dirname,
+                'public',
+                'Images',
+                'uploads',
+                imageFilename
+            );
+
+            fs.unlink(imagePath, (err) => {
+                if (err) {
+                    console.log('Image deletion failed:', err.message);
+                } else {
+                    console.log('Image deleted:', imageFilename);
+                }
+            });
         }
 
         res.json({ message: 'Event deleted successfully.' });
@@ -859,6 +948,21 @@ app.post('/api/change-password', authenticateToken, async (req, res) => {
     }
     console.log("USER:", req.user);
 });
+
+// Image Upload Route
+app.post('/api/upload', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded.' });
+  }
+
+  res.status(201).json({
+    message: 'File uploaded successfully',
+    filename: req.file.filename,
+    path: req.file.path
+  });
+});
+
+
 //////////////////////////////////////
 //END ROUTES TO HANDLE API REQUESTS
 //////////////////////////////////////
@@ -989,6 +1093,7 @@ app.get('/api/user-info', authenticateToken, async (req, res) => {
         if (connection) await connection.end();
     }
 });
+
 
 // Start the server
 app.listen(port, () => {
