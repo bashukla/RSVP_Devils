@@ -5,23 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Campus Event Platform</title>
   <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
 
 </head>
-<nav class="navbar">
-  <div class="nav-left">
-    <span class="logo">RSVP Devils</span>
-  </div>
-
-  <div class="nav-right">
-    <a href="/index.html">Home</a>
-    <a href="/events.html">Events</a>
-    <a href="/reminders.html">Reminders</a>
-    <a href="/dashboard.html">Dashboard</a>
-    <a href="/userSettings.html">User Settings</a>
-  </div>
-</nav>
 
 <body>
+  <nav class="navbar">
+    <div class="logo">Sun Devil Central</div>
+  
+    <div class="hamburger" id="hamburger">
+      ☰
+    </div>
+  </nav>
+  
+  <!-- Slide Menu -->
+  <div class="nav-links" id="navMenu">
+    <a href="/index.html"><i class="fas fa-house"></i> Home</a>
+    <a href="/events.html"><i class="fas fa-calendar"></i> Events</a>
+    <a href="/reminders.html"><i class="fas fa-bell"></i> Reminders</a>
+    <a href="/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
+  </div>
+  
+  <!-- Dark overlay -->
+  <div id="overlay" class="overlay"></div>
 
   <header>
     <div class="header-top">
@@ -74,6 +82,8 @@
       <a href="/dashboard.html">Open Analytics Dashboard</a>
     </div>
   </main>
+
   <script src="/js/index.js"></script>
+  <script src="js/navbar.js"></script>
 </body>
 </html>

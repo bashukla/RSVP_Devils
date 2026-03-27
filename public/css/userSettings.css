@@ -6,7 +6,15 @@
   --light-gray: #f4f4f4;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; 
+}
 
 body {
   font-family: 'Roboto', sans-serif;
@@ -15,28 +23,129 @@ body {
   color: #333;
 }
 
-/* ── NAVBAR ── */
+/* NAVBAR */
 .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;             
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--asu-maroon);
-  padding: 12px 20px;
+  background: #8C1D40;
+  padding: 0 20px;           
   color: white;
+  z-index: 2000;
 }
+
 .logo {
   font-weight: bold;
   font-size: 18px;
-  color: var(--asu-gold);
+  color: #FFC627;
 }
+
 .nav-right a {
   color: white;
   text-decoration: none;
   margin-left: 20px;
   font-weight: 500;
 }
-.nav-right a:hover { text-decoration: underline; }
 
+.nav-right a:hover {
+  text-decoration: underline;
+}
+
+.logo {
+  color: #FFC627;
+  font-weight: bold;
+}
+
+/* HAMBURGER */
+.hamburger {
+  font-size: 26px;
+  cursor: pointer;
+  display: block;
+}
+
+/* SLIDE MENU */
+.nav-links {
+  position: fixed;
+  top: 0;
+  right: -250px;
+  width: 250px;
+  height: 100%;
+  background: #8C1D40;
+  display: flex;
+  flex-direction: column;
+  padding: 60px 20px;
+  transition: right 0.3s ease;
+  z-index: 1000;
+}
+
+.nav-links.show {
+  right: 0;
+}
+
+/* LINKS */
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  padding: 15px 0;
+  font-size: 18px;
+}
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  padding: 15px 0;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ICON SIZE */
+.nav-links i {
+  width: 20px;
+  text-align: center;
+}
+.nav-links a.active {
+  background-color: #FFC627;
+  color: black;
+  border-radius: 6px;
+  padding-left: 10px;
+}
+
+/* OVERLAY */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  z-index: 999;
+}
+
+.overlay.show {
+  display: block;
+}
+
+/* BACK BUTTON */
+.back-btn {
+  margin: 20px;
+  padding: 10px 16px;
+  background-color: #8C1D40;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+body {
+  padding-top: 60px;
+
+}
 /* ── CAMPUS BANNER ── */
 .campus-banner {
   background-color: var(--asu-maroon);
