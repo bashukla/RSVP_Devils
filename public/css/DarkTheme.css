@@ -261,3 +261,95 @@
 :root.dark .message {
   color: #ccc;
 }
+/* ===== USER SETTINGS PAGE DARK MODE OVERRIDES ===== */
+
+/* Page background */
+:root.dark body {
+  background-color: #1a1a1a !important;
+  color: #f4f4f4 !important;
+}
+
+/* Settings cards */
+:root.dark .settings-card {
+  background-color: #2a2a2a;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+:root.dark .card-body {
+  background-color: #2a2a2a;
+  color: #f4f4f4;
+}
+
+/* Form labels */
+:root.dark label {
+  color: #FFC627;
+}
+
+/* Text inputs */
+:root.dark input[type="text"],
+:root.dark input[type="email"],
+:root.dark input[type="password"] {
+  background-color: #333;
+  color: #f4f4f4;
+  border-color: #555;
+}
+
+:root.dark input[type="text"]:focus,
+:root.dark input[type="email"]:focus,
+:root.dark input[type="password"]:focus {
+  border-color: #FFC627;
+}
+
+:root.dark input::placeholder {
+  color: #777;
+}
+
+/* Read-only displays */
+:root.dark .email-display,
+:root.dark .accCreation-Display {
+  background-color: #333;
+  border-color: #555;
+  color: #ccc;
+}
+
+/* Toggle rows */
+:root.dark .toggle-row {
+  border-bottom-color: #444;
+}
+
+:root.dark .toggle-label {
+  color: #f4f4f4;
+}
+
+:root.dark .toggle-label span {
+  color: #aaa;
+}
+
+/* Password hint */
+:root.dark .password-hint {
+  color: #777;
+}
+
+/* Change password toggle link */
+:root.dark .toggle-link {
+  color: #FFC627;
+}
+
+:root.dark .toggle-link:hover {
+  color: #e6b422;
+}
+
+/* Danger zone text */
+:root.dark .danger-text {
+  color: #ccc;
+}
+
+/* Popup */
+:root.dark #customPopup .popup-content {
+  background-color: #2a2a2a;
+  color: #f4f4f4;
+}
+
+:root.dark #customPopup .popup-message {
+  color: #ddd;
+}
