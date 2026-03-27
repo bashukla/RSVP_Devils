@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="css/DarkTheme.css">
+    <script src="js/theme-toggle.js"></script>
 </head>
 
 <nav class="navbar">
@@ -18,6 +20,10 @@
       <a href="/reminders.html">Reminders</a>
       <a href="/dashboard.html">Dashboard</a>
       <a href="/userSettings.html">User Settings</a>
+    </div>
+    <div class="nav-right">
+      <button id="theme-toggle-btn">🌙 Dark Mode</button>
+      <div class="hamburger" onclick="toggleMenu()"></div>
     </div>
   </nav>
 
