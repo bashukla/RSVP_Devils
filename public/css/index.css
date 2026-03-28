@@ -161,13 +161,22 @@ html, body {
 
   background: rgba(255, 255, 255, 0);
   transition: transform 0.3s, background 0.3s;
+  justify-content: flex-start;
 }
 
-.event-image {
+.image-wrapper {
     width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    border-radius: 8px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* 👈 prevents it from shrinking */
+}
+
+.image-wrapper img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
 }
 
 .carousel-card {
