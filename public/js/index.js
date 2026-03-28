@@ -13,18 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = '/logon.html';
         return;
     }
-
     await loadHighlightedEvents();
-});
-
-// logout button functionality
-const logoutBtn = document.getElementById('logoutBtn');
-
-logoutBtn.addEventListener('click', async () => {
-    const confirm = await showConfirm('Are you sure you want to logout?');
-    if(!confirm) return;
-    localStorage.removeItem('jwtToken');
-    window.location = '/logon.html';
 });
 
 // load highlighted events

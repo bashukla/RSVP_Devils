@@ -13,12 +13,18 @@
 
   <!-- NAVBAR -->
   <nav class="navbar">
+    <div class="hamburger" id="hamburger">&#9776;</div>
     <div class="logo">RSVP Devils</div>
-  
-    <div class="hamburger" id="hamburger">
-      ☰
+    <div class="profile-btn" id="profileBtn">
+      <i class="fas fa-user-circle"></i>
     </div>
   </nav>
+  
+  <!-- Profile Dropdown -->
+  <div class="profile-dropdown hidden" id="profileDropdown">
+    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
+    <a href="#" id="dropdownLogout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
   
   <!-- Slide Menu -->
   <div class="nav-links" id="navMenu">
@@ -26,7 +32,6 @@
     <a href="/events.html"><i class="fas fa-calendar"></i> Events</a>
     <a href="/reminders.html"><i class="fas fa-bell"></i> Reminders</a>
     <a href="/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
-    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
   </div>
   
   <!-- Dark overlay -->
@@ -34,7 +39,7 @@
 
   <!-- CAMPUS BANNER -->
   <div class="campus-banner">
-    <img src="./images/ASU Logos/asu-logo.png" alt="ASU Logo" class="asu-logo">
+    <img src="./images/ASU Logos/sparky-bw.png" alt="Sparky" class="asu-logo">
     <div class="banner-text">
       <h1>User Settings</h1>
       <p class="subtitle">Manage your account preferences</p>
@@ -177,4 +182,6 @@
   <script src="js/navbar.js"></script>
   <script src="/js/background.js"></script>
 </body>
+
+
 

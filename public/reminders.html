@@ -13,12 +13,18 @@
 <body>
 
     <nav class="navbar">
-        <div class="logo">RSVP Devils</div>
-      
-        <div class="hamburger" id="hamburger">
-          ☰
-        </div>
-      </nav>
+    <div class="hamburger" id="hamburger">&#9776;</div>
+    <div class="logo">RSVP Devils</div>
+    <div class="profile-btn" id="profileBtn">
+      <i class="fas fa-user-circle"></i>
+    </div>
+  </nav>
+  
+  <!-- Profile Dropdown -->
+  <div class="profile-dropdown hidden" id="profileDropdown">
+    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
+    <a href="#" id="dropdownLogout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
       
       <!-- Slide Menu -->
       <div class="nav-links" id="navMenu">
@@ -26,18 +32,20 @@
         <a href="/events.html"><i class="fas fa-calendar"></i> Events</a>
         <a href="/reminders.html"><i class="fas fa-bell"></i> Reminders</a>
         <a href="/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
-        <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
       </div>
       
       <!-- Dark overlay -->
       <div id="overlay" class="overlay"></div>
 
-    <div class="asu-header-bar"></div>
-
     <header>
-        <img src="/images/ASU Logos/asu-banner.png" alt="ASU Logo" class="asu-logo">
-        <h1>Event Reminders</h1>
-        <p>Stay updated on events you've RSVP'd to at Arizona State University</p>
+        <div class="header-inner">
+            <img src="/images/ASU Logos/asu-banner.png" alt="" class="asu-logo asu-logo-left">
+            <div class="header-text">
+                <h1>Event Reminders</h1>
+                <p>Stay updated on events you've RSVP'd to at Arizona State University</p>
+            </div>
+            <img src="/images/ASU Logos/asu-banner.png" alt="" class="asu-logo asu-logo-right">
+        </div>
     </header>
 
     <main>
@@ -123,5 +131,7 @@
   <script src="/js/background.js"></script>
 </body>
 </html>
+
+
 
 

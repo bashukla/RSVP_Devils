@@ -8,18 +8,18 @@
 </head>
 
 <nav class="navbar">
-    <div class="nav-left">
-      <span class="logo">RSVP Devils</span>
-    </div>
-  
-    <div class="nav-right">
-      <a href="/index.html">Home</a>
-      <a href="/events.html">Events</a>
-      <a href="/reminders.html">Reminders</a>
-      <a href="/dashboard.html">Dashboard</a>
-      <a href="/userSettings.html">User Settings</a>
+    <div class="hamburger" id="hamburger">&#9776;</div>
+    <div class="logo">RSVP Devils</div>
+    <div class="profile-btn" id="profileBtn">
+      <i class="fas fa-user-circle"></i>
     </div>
   </nav>
+  
+  <!-- Profile Dropdown -->
+  <div class="profile-dropdown hidden" id="profileDropdown">
+    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
+    <a href="#" id="dropdownLogout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
 
 <body>
     <div class="container">
@@ -38,5 +38,7 @@
   <script src="/js/background.js"></script>
 </body>
 </html>
+
+
 
 

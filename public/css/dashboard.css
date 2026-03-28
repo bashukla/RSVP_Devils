@@ -203,3 +203,42 @@ h1 {
     from { transform: translateY(-50px); opacity: 0; }
     to   { transform: translateY(0); opacity: 1; }
 }
+
+/* PROFILE DROPDOWN */
+.profile-dropdown {
+  position: fixed;
+  top: 60px;
+  right: 15px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 3000;
+  min-width: 160px;
+  overflow: hidden;
+  border-top: 3px solid #8C1D40;
+}
+
+.profile-dropdown a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+  margin: 0;
+}
+
+.profile-dropdown a:hover { background: #f5f5f5; color: #8C1D40; }
+.profile-dropdown.hidden { display: none; }
+
+/* PROFILE BUTTON */
+.profile-btn {
+  font-size: 28px;
+  cursor: pointer;
+  color: #FFC627;
+  transition: color 0.2s;
+}
+.profile-btn:hover { color: white; }

@@ -12,12 +12,18 @@
 
 <body>
   <nav class="navbar">
+    <div class="hamburger" id="hamburger">&#9776;</div>
     <div class="logo">RSVP Devils</div>
-  
-    <div class="hamburger" id="hamburger">
-      ☰
+    <div class="profile-btn" id="profileBtn">
+      <i class="fas fa-user-circle"></i>
     </div>
   </nav>
+  
+  <!-- Profile Dropdown -->
+  <div class="profile-dropdown hidden" id="profileDropdown">
+    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
+    <a href="#" id="dropdownLogout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
   
   <!-- Slide Menu -->
   <div class="nav-links" id="navMenu">
@@ -25,7 +31,6 @@
     <a href="/events.html"><i class="fas fa-calendar"></i> Events</a>
     <a href="/reminders.html"><i class="fas fa-bell"></i> Reminders</a>
     <a href="/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
-    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
   </div>
   
   <!-- Dark overlay -->
@@ -39,9 +44,7 @@
         <h1>Campus Event Discovery & RSVP Platform</h1>
         <p>Your centralized hub for discovering and managing campus events</p>
       </div>
-      <div class="header-right">
-        <button id="logoutBtn">Logout</button>
-      </div>
+      <div class="header-right"></div>
     </div>
   </header>
 
@@ -93,5 +96,7 @@
   <script src="/js/background.js"></script>
 </body>
 </html>
+
+
 
 
