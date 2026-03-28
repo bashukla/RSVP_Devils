@@ -206,3 +206,21 @@ function displayUserInfo(user) {
     });
     createdE1.textContent = formatted;
 }
+
+// ── BACKGROUND PICKER ──────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    const bgOptions = document.querySelectorAll('.bg-option');
+    const savedBg = localStorage.getItem('homeBg');
+
+    bgOptions.forEach(option => {
+        const bg = option.dataset.bg;
+        if (bg === savedBg) option.classList.add('active');
+
+        option.addEventListener('click', () => {
+            bgOptions.forEach(o => o.classList.remove('active'));
+            option.classList.add('active');
+            localStorage.setItem('homeBg', bg);
+            showPopup('success', 'Background updated!');
+        });
+    });
+});

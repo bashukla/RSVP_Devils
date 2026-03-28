@@ -363,6 +363,32 @@ button.btn {
 .btn-danger  { background-color: #e74c3c; color: white; }
 .btn-danger:hover  { background-color: #c0392b; }
 
+/* Background Picker */
+.bg-picker {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.bg-option {
+  width: 80px;
+  height: 55px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  background-size: cover;
+  background-position: center;
+  transition: border 0.2s, transform 0.2s;
+}
+
+.bg-option:nth-child(4) { background: linear-gradient(135deg, #8C1D40, #FFC627); }
+.bg-option:nth-child(5) { background: linear-gradient(135deg, #1a1a2e, #8C1D40); }
+.bg-option:nth-child(6) { background: #f5f6fa; border: 2px solid #ddd; }
+
+.bg-option:hover { transform: scale(1.08); }
+.bg-option.active { border-color: #FFC627; transform: scale(1.08); }
+
 .save-row {
   display: flex;
   justify-content: flex-end;

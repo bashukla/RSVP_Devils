@@ -18,30 +18,39 @@ html, body {
       background-color: #8C1D40;
       color: white;
       padding: 20px 30px;
-      text-align: center;
-      position: relative;
     }
     .header-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+    }
+    .header-left, .header-right {
+      flex: 1;
+    }
+    .header-right {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .header-center {
+      flex: 2;
+      text-align: center;
     }
     .asu-logo {
-      height: 80px;
+      height: 70px;
       width: auto;
       background: white;
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-radius: 6px;
+      margin-bottom: 8px;
     }
     header h1 {
-      margin: 0 0 8px 0;
-      font-size: 26px;
+      margin: 0 0 6px 0;
+      font-size: 22px;
     }
     header p {
       margin: 0;
       opacity: 0.9;
-      font-size: 15px;
+      font-size: 14px;
     }
     #logoutBtn {
       background: transparent;
@@ -58,10 +67,37 @@ html, body {
       color: #8C1D40;
     }
     @media (max-width: 600px) {
-      .asu-logo { height: 55px; }
+      .header-top { flex-direction: column; gap: 10px; }
+      .header-left { display: none; }
+      .asu-logo { height: 50px; }
       header h1 { font-size: 18px; }
-      main { padding: 20px; }
     }
+    /* Background Picker */
+    .bg-picker {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .bg-option {
+      width: 70px;
+      height: 50px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 3px solid transparent;
+      background-size: cover;
+      background-position: center;
+      transition: border 0.2s, transform 0.2s;
+    }
+
+    .bg-option:nth-child(2) { background: linear-gradient(135deg, #8C1D40, #FFC627); }
+    .bg-option:nth-child(3) { background: linear-gradient(135deg, #1a1a2e, #8C1D40); }
+    .bg-option:nth-child(4) { background: #f5f6fa; border: 2px solid #ddd; }
+
+    .bg-option:hover { transform: scale(1.08); }
+    .bg-option.active { border-color: #FFC627; transform: scale(1.08); }
+
     main {
       padding: 40px;
       max-width: 900px;

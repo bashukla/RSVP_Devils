@@ -278,3 +278,40 @@ function showConfirm(message) {
     popup.classList.remove('hidden');
   });
 }
+
+// BACKGROUND PICKER
+const bgOptions = document.querySelectorAll('.bg-option');
+
+// Apply saved background on load
+const savedBg = localStorage.getItem('homeBg');
+if (savedBg) applyBackground(savedBg);
+
+bgOptions.forEach(option => {
+    const bg = option.dataset.bg;
+
+    // Mark active option
+    if (bg === savedBg) option.classList.add('active');
+
+    option.addEventListener('click', () => {
+        bgOptions.forEach(o => o.classList.remove('active'));
+        option.classList.add('active');
+        localStorage.setItem('homeBg', bg);
+        applyBackground(bg);
+    });
+});
+
+function applyBackground(bg) {
+    if (bg === 'none') {
+        document.body.style.backgroundImage = 'none';
+        document.body.style.backgroundColor = '#f5f6fa';
+    } else if (bg.startsWith('url')) {
+        document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), ${bg}`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundAttachment = 'fixed';
+        document.body.style.backgroundPosition = 'center';
+    } else {
+        document.body.style.backgroundImage = bg;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundAttachment = 'fixed';
+    }
+}
