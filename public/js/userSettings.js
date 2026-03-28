@@ -212,6 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const bgOptions = document.querySelectorAll('.bg-option');
     const savedBg = localStorage.getItem('homeBg');
 
+    // Show custom image preview if saved
+    if (savedBg && savedBg.startsWith('data:image')) {
+        showCustomPreview(savedBg);
+    }
+
     bgOptions.forEach(option => {
         const bg = option.dataset.bg;
         if (bg === savedBg) option.classList.add('active');
@@ -220,7 +225,51 @@ document.addEventListener('DOMContentLoaded', () => {
             bgOptions.forEach(o => o.classList.remove('active'));
             option.classList.add('active');
             localStorage.setItem('homeBg', bg);
+            window.applyBackground(bg);
+            hideCustomPreview();
             showPopup('success', 'Background updated!');
         });
     });
+
+    // Custom image upload
+    document.getElementById('bgUpload').addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            showPopup('error', 'Image must be under 5MB.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64 = e.target.result;
+            localStorage.setItem('homeBg', base64);
+            window.applyBackground(base64);
+            showCustomPreview(base64);
+            bgOptions.forEach(o => o.classList.remove('active'));
+            document.getElementById('uploadStatus').textContent = 'Custom image set!';
+            showPopup('success', 'Custom background saved!');
+        };
+        reader.readAsDataURL(file);
+    });
 });
+
+function showCustomPreview(src) {
+    const preview = document.getElementById('customBgPreview');
+    const img = document.getElementById('customBgImg');
+    img.src = src;
+    preview.style.display = 'block';
+}
+
+function hideCustomPreview() {
+    document.getElementById('customBgPreview').style.display = 'none';
+    document.getElementById('uploadStatus').textContent = '';
+}
+
+function removeCustomBg() {
+    localStorage.setItem('homeBg', 'none');
+    window.applyBackground('none');
+    hideCustomPreview();
+    showPopup('success', 'Background removed.');
+}

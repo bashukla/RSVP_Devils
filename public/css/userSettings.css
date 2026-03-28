@@ -389,6 +389,22 @@ button.btn {
 .bg-option:hover { transform: scale(1.08); }
 .bg-option.active { border-color: #FFC627; transform: scale(1.08); }
 
+/* Upload Zone */
+.bg-upload-zone {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  max-width: 300px;
+}
+
+.bg-upload-zone:hover {
+  border-color: #8C1D40;
+  background: #fdf5f7;
+}
+
 .save-row {
   display: flex;
   justify-content: flex-end;

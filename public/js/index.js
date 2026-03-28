@@ -23,7 +23,7 @@ const logoutBtn = document.getElementById('logoutBtn');
 logoutBtn.addEventListener('click', async () => {
     const confirm = await showConfirm('Are you sure you want to logout?');
     if(!confirm) return;
-    localStorage.clear('jwtToken');
+    localStorage.removeItem('jwtToken');
     window.location = '/logon.html';
 });
 
@@ -288,7 +288,7 @@ const bgOptions = document.querySelectorAll('.bg-option');
 
 // Apply saved background on load
 const savedBg = localStorage.getItem('homeBg');
-if (savedBg) applyBackground(savedBg);
+if (savedBg) window.applyBackground(savedBg);
 
 bgOptions.forEach(option => {
     const bg = option.dataset.bg;

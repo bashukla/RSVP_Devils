@@ -5,30 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = '/logon.html';
         return;
     }
-
-    // Apply saved background
-    const savedBg = localStorage.getItem('homeBg');
-    if (savedBg) applyBackground(savedBg);
-
     loadReminders();
     loadUserEmail();
 });
-
-function applyBackground(bg) {
-    if (bg === 'none') {
-        document.body.style.backgroundImage = 'none';
-        document.body.style.backgroundColor = '#f5f6fa';
-    } else if (bg.startsWith('url')) {
-        document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), ${bg}`;
-        document.body.style.backgroundSize = 'cover';
-        document.body.style.backgroundAttachment = 'fixed';
-        document.body.style.backgroundPosition = 'center';
-    } else {
-        document.body.style.backgroundImage = bg;
-        document.body.style.backgroundSize = 'cover';
-        document.body.style.backgroundAttachment = 'fixed';
-    }
-}
 
 // DOM ELEMENTS
 const remindersList = document.getElementById('remindersList');
