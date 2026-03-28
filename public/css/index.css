@@ -18,30 +18,39 @@ html, body {
       background-color: #8C1D40;
       color: white;
       padding: 20px 30px;
-      text-align: center;
-      position: relative;
     }
     .header-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+    }
+    .header-left, .header-right {
+      flex: 1;
+    }
+    .header-right {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .header-center {
+      flex: 2;
+      text-align: center;
     }
     .asu-logo {
-      height: 80px;
+      height: 70px;
       width: auto;
       background: white;
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-radius: 6px;
+      margin-bottom: 8px;
     }
     header h1 {
-      margin: 0 0 8px 0;
-      font-size: 26px;
+      margin: 0 0 6px 0;
+      font-size: 22px;
     }
     header p {
       margin: 0;
       opacity: 0.9;
-      font-size: 15px;
+      font-size: 14px;
     }
     #logoutBtn {
       background: transparent;
@@ -58,10 +67,37 @@ html, body {
       color: #8C1D40;
     }
     @media (max-width: 600px) {
-      .asu-logo { height: 55px; }
+      .header-top { flex-direction: column; gap: 10px; }
+      .header-left { display: none; }
+      .asu-logo { height: 50px; }
       header h1 { font-size: 18px; }
-      main { padding: 20px; }
     }
+    /* Background Picker */
+    .bg-picker {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .bg-option {
+      width: 70px;
+      height: 50px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 3px solid transparent;
+      background-size: cover;
+      background-position: center;
+      transition: border 0.2s, transform 0.2s;
+    }
+
+    .bg-option:nth-child(2) { background: linear-gradient(135deg, #8C1D40, #FFC627); }
+    .bg-option:nth-child(3) { background: linear-gradient(135deg, #1a1a2e, #8C1D40); }
+    .bg-option:nth-child(4) { background: #f5f6fa; border: 2px solid #ddd; }
+
+    .bg-option:hover { transform: scale(1.08); }
+    .bg-option.active { border-color: #FFC627; transform: scale(1.08); }
+
     main {
       padding: 40px;
       max-width: 900px;
@@ -100,7 +136,7 @@ html, body {
   width: 90%;
   max-width: 900px;
   margin: 30px auto;
-  background-color: #FFC627;
+   background-color: rgba(255, 198, 39, 0.8); 
   padding: 30px 20px;
   border-radius: 12px;
   overflow: hidden;
@@ -125,13 +161,22 @@ html, body {
 
   background: rgba(255, 255, 255, 0);
   transition: transform 0.3s, background 0.3s;
+  justify-content: flex-start;
 }
 
-.event-image {
+.image-wrapper {
     width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    border-radius: 8px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* 👈 prevents it from shrinking */
+}
+
+.image-wrapper img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
 }
 
 .carousel-card {
@@ -316,25 +361,66 @@ html, body {
   font-size: 26px;
   cursor: pointer;
   display: block;
+  color: white;
 }
+
+/* PROFILE BUTTON */
+.profile-btn {
+  font-size: 28px;
+  cursor: pointer;
+  color: #FFC627;
+  transition: color 0.2s;
+}
+
+.profile-btn:hover { color: white; }
+
+/* PROFILE DROPDOWN */
+.profile-dropdown {
+  position: fixed;
+  top: 60px;
+  right: 15px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 3000;
+  min-width: 160px;
+  overflow: hidden;
+  border-top: 3px solid #8C1D40;
+}
+
+.profile-dropdown a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+  margin: 0;
+}
+
+.profile-dropdown a:hover { background: #f5f5f5; color: #8C1D40; }
+.profile-dropdown.hidden { display: none; }
 
 /* SLIDE MENU */
 .nav-links {
   position: fixed;
   top: 0;
-  right: -250px;
+  left: -250px;
   width: 250px;
   height: 100%;
   background: #8C1D40;
   display: flex;
   flex-direction: column;
   padding: 60px 20px;
-  transition: right 0.3s ease;
+  transition: left 0.3s ease;
   z-index: 1000;
 }
 
 .nav-links.show {
-  right: 0;
+  left: 0;
 }
 
 /* LINKS */

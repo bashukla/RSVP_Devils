@@ -7,23 +7,28 @@
   <link rel="stylesheet" href="css/index.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="css/DarkTheme.css">
-  <script src = "js/theme-toggle.js"></script>
-</head>
-
+  <script src="js/theme-toggle.js"></script>
 </head>
 
 <body>
   <nav class="navbar">
+    <div class="hamburger" id="hamburger">&#9776;</div>
     <div class="logo">RSVP Devils</div>
-  
-    <div class="hamburger" id="hamburger">
-      ☰
-    </div>
     <div class="nav-right">
       <button id="theme-toggle-btn">🌙 Dark Mode</button>
       <div class="hamburger" onclick="toggleMenu()"></div>
+</div> 
+
+    <div class="profile-btn" id="profileBtn">
+      <i class="fas fa-user-circle"></i>
     </div>
   </nav>
+  
+  <!-- Profile Dropdown -->
+  <div class="profile-dropdown hidden" id="profileDropdown">
+    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
+    <a href="#" id="dropdownLogout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
   
   <!-- Slide Menu -->
   <div class="nav-links" id="navMenu">
@@ -31,7 +36,6 @@
     <a href="/events.html"><i class="fas fa-calendar"></i> Events</a>
     <a href="/reminders.html"><i class="fas fa-bell"></i> Reminders</a>
     <a href="/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
-    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
   </div>
   
   <!-- Dark overlay -->
@@ -39,11 +43,14 @@
 
   <header>
     <div class="header-top">
-      <img src="/images/asu-logo.png" alt="ASU Logo" class="asu-logo">
-      <button id="logoutBtn">Logout</button>
+      <div class="header-left"></div>
+      <div class="header-center">
+        <img src="/images/ASU Logos/asu-logo.png" alt="ASU Logo" class="asu-logo">
+        <h1>Campus Event Discovery & RSVP Platform</h1>
+        <p>Your centralized hub for discovering and managing campus events</p>
+      </div>
+      <div class="header-right"></div>
     </div>
-    <h1>Campus Event Discovery & RSVP Platform</h1>
-    <p>Your centralized hub for discovering and managing campus events</p>
   </header>
 
   <!-- Highlight Events Display -->
@@ -91,5 +98,6 @@
 
   <script src="/js/index.js"></script>
   <script src="js/navbar.js"></script>
+  <script src="/js/background.js"></script>
 </body>
 </html>

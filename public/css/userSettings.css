@@ -72,19 +72,19 @@ body {
 .nav-links {
   position: fixed;
   top: 0;
-  right: -250px;
+  left: -250px;
   width: 250px;
   height: 100%;
   background: #8C1D40;
   display: flex;
   flex-direction: column;
   padding: 60px 20px;
-  transition: right 0.3s ease;
+  transition: left 0.3s ease;
   z-index: 1000;
 }
 
 .nav-links.show {
-  right: 0;
+  left: 0;
 }
 
 /* LINKS */
@@ -159,12 +159,10 @@ body {
   text-align: center;
 }
 .campus-banner .asu-logo {
-  height: 60px;
+  height: 80px;
   width: auto;
-  background: white;
-  padding: 6px 10px;
-  border-radius: 5px;
   flex-shrink: 0;
+  filter: brightness(0) invert(1);
 }
 .campus-banner .banner-text h1 {
   margin: 0 0 4px 0;
@@ -321,7 +319,7 @@ input[type="password"]:focus {
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0; left: 0; left: 0; bottom: 0;
   background-color: #ccc;
   border-radius: 26px;
   transition: 0.3s;
@@ -362,6 +360,48 @@ button.btn {
 .btn-primary:hover { background-color: #e6b422; }
 .btn-danger  { background-color: #e74c3c; color: white; }
 .btn-danger:hover  { background-color: #c0392b; }
+
+/* Background Picker */
+.bg-picker {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.bg-option {
+  width: 80px;
+  height: 55px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  background-size: cover;
+  background-position: center;
+  transition: border 0.2s, transform 0.2s;
+}
+
+.bg-option:nth-child(4) { background: linear-gradient(135deg, #8C1D40, #FFC627); }
+.bg-option:nth-child(5) { background: linear-gradient(135deg, #1a1a2e, #8C1D40); }
+.bg-option:nth-child(6) { background: #f5f6fa; border: 2px solid #ddd; }
+
+.bg-option:hover { transform: scale(1.08); }
+.bg-option.active { border-color: #FFC627; transform: scale(1.08); }
+
+/* Upload Zone */
+.bg-upload-zone {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  max-width: 300px;
+}
+
+.bg-upload-zone:hover {
+  border-color: #8C1D40;
+  background: #fdf5f7;
+}
 
 .save-row {
   display: flex;
@@ -480,3 +520,42 @@ a.back-link:hover { text-decoration: underline; }
     from { transform: translateY(-50px); opacity: 0; }
     to   { transform: translateY(0); opacity: 1; }
 }
+
+/* PROFILE DROPDOWN */
+.profile-dropdown {
+  position: fixed;
+  top: 60px;
+  right: 15px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 3000;
+  min-width: 160px;
+  overflow: hidden;
+  border-top: 3px solid #8C1D40;
+}
+
+.profile-dropdown a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+  margin: 0;
+}
+
+.profile-dropdown a:hover { background: #f5f5f5; color: #8C1D40; }
+.profile-dropdown.hidden { display: none; }
+
+/* PROFILE BUTTON */
+.profile-btn {
+  font-size: 28px;
+  cursor: pointer;
+  color: #FFC627;
+  transition: color 0.2s;
+}
+.profile-btn:hover { color: white; }

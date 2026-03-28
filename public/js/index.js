@@ -13,18 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = '/logon.html';
         return;
     }
-
     await loadHighlightedEvents();
-});
-
-// logout button functionality
-const logoutBtn = document.getElementById('logoutBtn');
-
-logoutBtn.addEventListener('click', async () => {
-    const confirm = await showConfirm('Are you sure you want to logout?');
-    if(!confirm) return;
-    localStorage.clear('jwtToken');
-    window.location = '/logon.html';
 });
 
 // load highlighted events
@@ -75,7 +64,8 @@ function renderCarousel(events) {
         card.innerHTML = `
         
         <div class="image-wrapper">
-        <img src="${event.image ? `/images/uploads/${event.image}` : '/images/Arizona-State-Sun-Devils-logo.png'}" class="event-image">
+        <img src="${event.image ? `/images/uploads/${event.image}` : '/images/ASU Logos/Arizona-State-Sun-Devils-logo.png'}" class="event-image">
+        </div>
 
             <h3>${event.description}</h3>
             <p>${date.toLocaleDateString()}</p>
@@ -281,4 +271,41 @@ function showConfirm(message) {
     popupButtons.appendChild(cancelBtn);
     popup.classList.remove('hidden');
   });
+}
+
+// BACKGROUND PICKER
+const bgOptions = document.querySelectorAll('.bg-option');
+
+// Apply saved background on load
+const savedBg = localStorage.getItem('homeBg');
+if (savedBg) window.applyBackground(savedBg);
+
+bgOptions.forEach(option => {
+    const bg = option.dataset.bg;
+
+    // Mark active option
+    if (bg === savedBg) option.classList.add('active');
+
+    option.addEventListener('click', () => {
+        bgOptions.forEach(o => o.classList.remove('active'));
+        option.classList.add('active');
+        localStorage.setItem('homeBg', bg);
+        applyBackground(bg);
+    });
+});
+
+function applyBackground(bg) {
+    if (bg === 'none') {
+        document.body.style.backgroundImage = 'none';
+        document.body.style.backgroundColor = '#f5f6fa';
+    } else if (bg.startsWith('url')) {
+        document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), ${bg}`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundAttachment = 'fixed';
+        document.body.style.backgroundPosition = 'center';
+    } else {
+        document.body.style.backgroundImage = bg;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundAttachment = 'fixed';
+    }
 }

@@ -10,27 +10,27 @@
 </head>
 
 <nav class="navbar">
-    <div class="nav-left">
-      <span class="logo">RSVP Devils</span>
-    </div>
-  
-    <div class="nav-right">
-      <a href="/index.html">Home</a>
-      <a href="/events.html">Events</a>
-      <a href="/reminders.html">Reminders</a>
-      <a href="/dashboard.html">Dashboard</a>
-      <a href="/userSettings.html">User Settings</a>
+    <div class="hamburger" id="hamburger">&#9776;</div>
+    <div class="logo">RSVP Devils</div>
+    <div class="profile-btn" id="profileBtn">
+      <i class="fas fa-user-circle"></i>
     </div>
     <div class="nav-right">
       <button id="theme-toggle-btn">🌙 Dark Mode</button>
       <div class="hamburger" onclick="toggleMenu()"></div>
     </div>
   </nav>
+  
+  <!-- Profile Dropdown -->
+  <div class="profile-dropdown hidden" id="profileDropdown">
+    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
+    <a href="#" id="dropdownLogout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
 
 <body>
     <div class="container">
         <div class="header">
-            <img src="/images/Arizona-State-Sun-Devils-logo.png" alt="ASU Logo" class="asu-logo">
+            <img src="/images/ASU Logos/Arizona-State-Sun-Devils-logo.png" alt="ASU Logo" class="asu-logo">
             <h1>Users</h1>
             <div>
                 <button id="refreshButton">Refresh List</button>
@@ -41,5 +41,10 @@
     </div>
     <script src="/js/dashboard.js"></script>
     <script src="/js/datamodel.js"></script>
+  <script src="/js/background.js"></script>
 </body>
 </html>
+
+
+
+

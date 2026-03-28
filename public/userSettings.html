@@ -15,16 +15,23 @@
 
   <!-- NAVBAR -->
   <nav class="navbar">
+    <div class="hamburger" id="hamburger">&#9776;</div>
     <div class="logo">RSVP Devils</div>
-  
-    <div class="hamburger" id="hamburger">
-      ☰
-    </div>
     <div class="nav-right">
       <button id="theme-toggle-btn">🌙 Dark Mode</button>
       <div class="hamburger" onclick="toggleMenu()"></div>
+    </div> 
+
+    <div class="profile-btn" id="profileBtn">
+      <i class="fas fa-user-circle"></i>
     </div>
   </nav>
+  
+  <!-- Profile Dropdown -->
+  <div class="profile-dropdown hidden" id="profileDropdown">
+    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
+    <a href="#" id="dropdownLogout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
   
   <!-- Slide Menu -->
   <div class="nav-links" id="navMenu">
@@ -32,7 +39,6 @@
     <a href="/events.html"><i class="fas fa-calendar"></i> Events</a>
     <a href="/reminders.html"><i class="fas fa-bell"></i> Reminders</a>
     <a href="/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
-    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
   </div>
   
   <!-- Dark overlay -->
@@ -40,7 +46,7 @@
 
   <!-- CAMPUS BANNER -->
   <div class="campus-banner">
-    <img src="./Images/asu-logo.png" alt="ASU Logo" class="asu-logo">
+    <img src="./images/ASU Logos/sparky-bw.png" alt="Sparky" class="asu-logo">
     <div class="banner-text">
       <h1>User Settings</h1>
       <p class="subtitle">Manage your account preferences</p>
@@ -135,6 +141,37 @@
       </div>
     </div>
 
+    <!-- CARD: Background Customization -->
+    <div class="settings-card">
+      <h2 class="card-title">Home Page Background</h2>
+      <div class="card-body">
+        <p style="color:#666; font-size:14px; margin-bottom:15px;">Choose a background applied across all pages. Your selection is saved automatically.</p>
+        <div class="bg-picker">
+          <div class="bg-option" data-bg="url('/images/ASU Campus/ASU Campus.jpg')" style="background-image: url('/images/ASU Campus/ASU Campus.jpg')" title="ASU Campus"></div>
+          <div class="bg-option" data-bg="url('/images/ASU Campus/ASU Bridge.jpg')" style="background-image: url('/images/ASU Campus/ASU Bridge.jpg')" title="ASU Bridge"></div>
+          <div class="bg-option" data-bg="url('/images/ASU Campus/ASU-McCord-Hall.webp')" style="background-image: url('/images/ASU Campus/ASU-McCord-Hall.webp')" title="McCord Hall"></div>
+          <div class="bg-option" data-bg="linear-gradient(135deg, #8C1D40, #FFC627)" title="Maroon & Gold"></div>
+          <div class="bg-option" data-bg="linear-gradient(135deg, #1a1a2e, #8C1D40)" title="Dark Maroon"></div>
+          <div class="bg-option" data-bg="none" title="Default"></div>
+        </div>
+
+        <div style="margin-top:20px; border-top: 1px solid #eee; padding-top:20px;">
+          <p style="color:#666; font-size:14px; margin-bottom:8px;">Or upload your own image:</p>
+          <input type="file" id="bgUpload" accept="image/*" style="display:none;">
+          <div class="bg-upload-zone" onclick="document.getElementById('bgUpload').click()">
+            <i class="fas fa-cloud-upload-alt" style="font-size:24px; color:#8C1D40;"></i>
+            <p style="margin:8px 0 4px 0; font-weight:600; color:#333;">Click to upload</p>
+            <p style="margin:0; font-size:12px; color:#999;">PNG, JPG, WEBP up to 5MB</p>
+          </div>
+          <span id="uploadStatus" style="display:block; margin-top:8px; font-size:13px; color:#28a745;"></span>
+          <div id="customBgPreview" style="margin-top:10px; display:none; align-items:center; gap:10px;">
+            <img id="customBgImg" style="height:60px; border-radius:8px; border:3px solid #FFC627;">
+            <button class="btn btn-danger" style="padding:5px 12px; font-size:12px;" onclick="removeCustomBg()">Remove</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- CARD 3: Danger Zone -->
     <div class="settings-card danger-card">
       <h2 class="card-title">Danger Zone</h2>
@@ -150,4 +187,8 @@
   <button class="back-btn" onclick="goDashboard()">← Back to Home</button>
   <script src="js/userSettings.js"></script>
   <script src="js/navbar.js"></script>
+  <script src="/js/background.js"></script>
 </body>
+
+
+

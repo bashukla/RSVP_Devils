@@ -1,4 +1,4 @@
-# Sun Devil Central — Campus Event Discovery & RSVP Platform
+# RSVP Devils — Campus Event Discovery & RSVP Platform
 
 A web app for Arizona State University students to discover, create, and RSVP to campus events, with automated email reminders.
 

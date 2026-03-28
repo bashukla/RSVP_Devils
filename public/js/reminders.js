@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = '/logon.html';
         return;
     }
-    // Load user email from token or API (here we just fetch reminders which validates token)
     loadReminders();
     loadUserEmail();
 });
