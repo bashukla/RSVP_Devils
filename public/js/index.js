@@ -64,7 +64,7 @@ function renderCarousel(events) {
         card.innerHTML = `
         
         <div class="image-wrapper">
-        <img src="${event.image ? `/images/uploads/${event.image}` : '/images/Arizona-State-Sun-Devils-logo.png'}" class="event-image">
+        <img src="${event.image ? `/images/uploads/${event.image}` : '/images/ASU Logos/Arizona-State-Sun-Devils-logo.png'}" class="event-image">
 
             <h3>${event.description}</h3>
             <p>${date.toLocaleDateString()}</p>
