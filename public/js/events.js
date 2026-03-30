@@ -338,7 +338,11 @@ function attachCardListeners(token) {
                     showPopup('success', 'RSVP cancelled successfully!');
                 } else {
                     userRSVPs.push(eventId);
-                    showPopup('success', 'RSVP successful!');
+                    const prefs = JSON.parse(localStorage.getItem('notifPrefs') || '{}');
+                    const msg = prefs.confirmations !== false
+                        ? 'RSVP successful! A confirmation email will be sent to you.'
+                        : 'RSVP successful!';
+                    showPopup('success', msg);
                 }
 
                 await loadEvents(token);
