@@ -4,6 +4,7 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
@@ -30,6 +31,9 @@ app.use(express.json());
 app.use('/css', express.static('public/css'));
 app.use('/js', express.static('public/js'));
 app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+
+// Serve uploaded images from the "uploads" folder
+app.use('/uploads', express.static('uploads'));
 
 
 // Public login page
@@ -392,7 +396,7 @@ app.post(
   upload.single('image'),
   async (req, res) => {
 
-        console.log("ROUTE HIT: /api/events");
+    console.log("ROUTE HIT: /api/events");
 
     const { type, description, event_datetime, location, tags } = req.body;
 
@@ -403,6 +407,7 @@ app.post(
     try {
       const connection = await createConnection();
 
+      // Get user ID
       const [userRows] = await connection.execute(
         'SELECT user_id FROM user WHERE email = ?',
         [req.user.email]
@@ -410,12 +415,22 @@ app.post(
 
       const userId = userRows[0].user_id;
 
+      // Multer provides the saved filename
       const imageFilename = req.file ? req.file.filename : null;
 
+      // Insert event (store filename only)
       const [result] = await connection.execute(
         `INSERT INTO events (type, description, event_datetime, location, created_by, tags, image)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [type, description, event_datetime, location, userId, tags?.trim() || null, imageFilename]
+        [
+          type,
+          description,
+          event_datetime,
+          location,
+          userId,
+          tags?.trim() || null,
+          imageFilename
+        ]
       );
 
       await connection.end();
@@ -423,7 +438,8 @@ app.post(
       res.status(201).json({
         message: 'Event created successfully',
         event_id: result.insertId,
-        image: imageFilename
+        // Return a usable URL for frontend
+        image: imageFilename ? `/uploads/${imageFilename}` : null
       });
 
     } catch (error) {
@@ -452,7 +468,7 @@ app.put(
     try {
       const connection = await createConnection();
 
-      // Get current image
+      // Get current image filename
       const [existingRows] = await connection.execute(
         'SELECT image FROM events WHERE event_id = ?',
         [eventId]
@@ -465,10 +481,11 @@ app.put(
 
       const currentImage = existingRows[0].image;
 
-      // If new image uploaded, use it; otherwise keep existing
+      // Determine new image (if uploaded)
       const newImageFilename = req.file ? req.file.filename : currentImage;
 
-      const [result] = await connection.execute(
+      // Update event
+      await connection.execute(
         `UPDATE events 
          SET type = ?, description = ?, event_datetime = ?, location = ?, tags = ?, image = ?
          WHERE event_id = ?`,
@@ -485,20 +502,22 @@ app.put(
 
       await connection.end();
 
+      // Delete old image ONLY if a new one was uploaded
       if (req.file && currentImage) {
-        const fs = require('fs');
-        const path = require('path');
+        const oldPath = path.join(__dirname, 'uploads', currentImage);
 
-        const oldPath = path.join(__dirname, 'public', 'Images', 'uploads', currentImage);
-
-        fs.unlink(oldPath, err => {
-          if (err) console.log("Old image deletion failed:", err.message);
+        fs.unlink(oldPath, (err) => {
+          if (err) {
+            console.log("Old image deletion failed:", err.message);
+          } else {
+            console.log("Old image deleted:", currentImage);
+          }
         });
       }
 
       res.json({
         message: 'Event updated successfully.',
-        image: newImageFilename
+        image: newImageFilename ? `/uploads/${newImageFilename}` : null
       });
 
     } catch (error) {
@@ -509,8 +528,6 @@ app.put(
 );
 
 // Route: Delete Event
-
-const fs = require('fs');
 app.delete('/api/events/:id', authenticateToken, async (req, res) => {
     const eventId = req.params.id;
 
@@ -555,13 +572,7 @@ app.delete('/api/events/:id', authenticateToken, async (req, res) => {
 
         // 4. Delete image file from server (if exists)
         if (imageFilename) {
-            const imagePath = path.join(
-                __dirname,
-                'public',
-                'Images',
-                'uploads',
-                imageFilename
-            );
+            const imagePath = path.join(__dirname, 'uploads', imageFilename);
 
             fs.unlink(imagePath, (err) => {
                 if (err) {
@@ -955,10 +966,12 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
     return res.status(400).json({ message: 'No file uploaded.' });
   }
 
+  const imageUrl = `/uploads/${req.file.filename}`;
+
   res.status(201).json({
     message: 'File uploaded successfully',
     filename: req.file.filename,
-    path: req.file.path
+    url: imageUrl
   });
 });
 
