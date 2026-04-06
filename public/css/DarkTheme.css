@@ -353,3 +353,335 @@
 :root.dark #customPopup .popup-message {
   color: #ddd;
 }
+/* ===== DASHBOARD / CHART BUILDER DARK MODE OVERRIDES ===== */
+
+/* Page background */
+:root.dark .page-wrapper {
+  background-color: #1a1a1a;
+}
+
+/* Status row */
+:root.dark .status-row h2 {
+  color: #f4f4f4;
+}
+
+:root.dark .status-pill {
+  background-color: #2a2a2a;
+  border-color: #444;
+  color: #aaa;
+}
+
+/* Panels */
+:root.dark .panel {
+  background-color: #2a2a2a;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+:root.dark .panel-body {
+  background-color: #2a2a2a;
+}
+
+/* Diagnostic test buttons */
+:root.dark .test-btn {
+  background-color: #333;
+  border-color: #444;
+  color: #ccc;
+}
+
+:root.dark .test-btn:hover {
+  background-color: #3a3a3a;
+  border-color: #FFC627;
+  color: #FFC627;
+}
+
+:root.dark .test-btn i {
+  color: #FFC627;
+}
+
+:root.dark .test-btn.pass {
+  background-color: rgba(40,167,69,0.1);
+  border-color: #28a745;
+  color: #28a745;
+}
+
+:root.dark .test-btn.pass i {
+  color: #28a745;
+}
+
+:root.dark .test-btn.fail {
+  background-color: rgba(231,76,60,0.1);
+  border-color: #E74C3C;
+  color: #E74C3C;
+}
+
+:root.dark .test-btn.fail i {
+  color: #E74C3C;
+}
+
+/* Stat cards */
+:root.dark .stat-card {
+  background-color: #2a2a2a;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+:root.dark .stat-card-title {
+  color: #FFC627;
+}
+
+:root.dark .stat-item {
+  background-color: #333;
+  border-color: #444;
+}
+
+:root.dark .stat-item .stat-val {
+  color: #FFC627;
+}
+
+:root.dark .stat-item .stat-lbl {
+  color: #888;
+}
+
+:root.dark .stat-item .stat-val.loading {
+  color: #555;
+}
+
+/* Section titles */
+:root.dark .section-title {
+  color: #FFC627;
+  border-bottom-color: #444;
+}
+
+/* Form fields inside builder */
+:root.dark .field label {
+  color: #aaa;
+}
+
+:root.dark select,
+:root.dark input[type="text"] {
+  background-color: #333;
+  color: #f4f4f4;
+  border-color: #555;
+}
+
+:root.dark select:focus,
+:root.dark input[type="text"]:focus {
+  border-color: #FFC627;
+}
+
+/* Chart type buttons */
+:root.dark .chart-type-btn {
+  background-color: #333;
+  border-color: #444;
+  color: #aaa;
+}
+
+:root.dark .chart-type-btn:hover {
+  border-color: #FFC627;
+  color: #FFC627;
+}
+
+:root.dark .chart-type-btn.active {
+  border-color: #FFC627;
+  background-color: rgba(255,198,39,0.1);
+  color: #FFC627;
+}
+
+/* Status bar */
+:root.dark .status-bar {
+  background-color: #333;
+  border-color: #444;
+  color: #aaa;
+}
+
+/* Chart preview */
+:root.dark .chart-preview-header {
+  border-bottom-color: #444;
+}
+
+:root.dark .chart-title-input {
+  color: #FFC627;
+  border-bottom-color: #444;
+}
+
+:root.dark .chart-title-input::placeholder {
+  color: #555;
+}
+
+:root.dark .chart-placeholder p {
+  color: #555;
+}
+
+:root.dark .chart-placeholder .big-icon {
+  color: #444;
+}
+
+:root.dark .icon-btn {
+  background-color: #333;
+  border-color: #444;
+  color: #aaa;
+}
+
+:root.dark .icon-btn:hover {
+  border-color: #FFC627;
+  color: #FFC627;
+  background-color: #3a3a3a;
+}
+
+/* Category tabs */
+:root.dark .cat-tabs {
+  border-color: #444;
+}
+
+:root.dark .cat-tab {
+  background-color: #2a2a2a;
+  color: #aaa;
+  border-right-color: #444;
+}
+
+:root.dark .cat-tab:hover {
+  background-color: #333;
+  color: #FFC627;
+}
+
+:root.dark .cat-tab.active {
+  background-color: #8C1D40;
+  color: white;
+}
+
+/* Lanes */
+:root.dark .graph-lane {
+  background-color: #2a2a2a;
+}
+
+:root.dark .lane-drop-zone {
+  background-color: #2a2a2a;
+}
+
+:root.dark .lane-drop-zone.drag-over {
+  background-color: rgba(140,29,64,0.15);
+}
+
+:root.dark .lane-empty {
+  border-color: #444;
+  color: #555;
+}
+
+/* Parking zone */
+:root.dark .parking-zone {
+  background-color: #2a2a2a;
+}
+
+:root.dark .parking-zone .lane-drop-zone {
+  background: repeating-linear-gradient(
+    45deg,
+    #2a2a2a,
+    #2a2a2a 10px,
+    #252525 10px,
+    #252525 20px
+  );
+}
+
+:root.dark .parking-zone .lane-drop-zone.drag-over {
+  background: rgba(255,198,39,0.08);
+}
+
+/* Saved chart cards */
+:root.dark .saved-card {
+  background-color: #333;
+  border-color: #444;
+}
+
+:root.dark .saved-card:hover {
+  border-color: #8C1D40;
+}
+
+:root.dark .saved-card-name {
+  color: #f4f4f4;
+}
+
+:root.dark .saved-card-meta {
+  color: #777;
+}
+
+:root.dark .card-action-btn {
+  background-color: #3a3a3a;
+  border-color: #555;
+  color: #aaa;
+}
+
+:root.dark .card-action-btn:hover {
+  border-color: #FFC627;
+  color: #FFC627;
+  background-color: #444;
+}
+
+:root.dark .card-action-btn.danger:hover {
+  border-color: #E74C3C;
+  color: #E74C3C;
+  background-color: #444;
+}
+
+/* Divider */
+:root.dark hr.divider {
+  border-top-color: #444;
+}
+
+/* Save modal */
+:root.dark .modal-content {
+  background-color: #2a2a2a;
+  color: #f4f4f4;
+}
+
+:root.dark .modal-content h3 {
+  color: #FFC627;
+}
+
+:root.dark .modal-content select,
+:root.dark .modal-content input[type="text"] {
+  background-color: #333;
+  color: #f4f4f4;
+  border-color: #555;
+}
+
+:root.dark .modal-content label {
+  color: #aaa;
+}
+
+/* Test results popup list */
+:root.dark .test-results-list li.pass {
+  background-color: rgba(40,167,69,0.15);
+  color: #5cb85c;
+}
+
+:root.dark .test-results-list li.fail {
+  background-color: rgba(231,76,60,0.15);
+  color: #e57373;
+}
+
+/* Mini chart cards dark mode */
+:root.dark .saved-card {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+:root.dark .saved-card:hover {
+  border-color: #8C1D40;
+}
+:root.dark .saved-card-title {
+  color: #FFC627;
+}
+:root.dark .saved-card-subtitle {
+  color: #666;
+}
+:root.dark .mini-chart-wrapper {
+  background: #333;
+}
+:root.dark .card-action-btn {
+  background-color: #333;
+  border-color: #555;
+  color: #aaa;
+}
+:root.dark .card-action-btn:hover {
+  border-color: #FFC627;
+  color: #FFC627;
+  background-color: #3a3a3a;
+}

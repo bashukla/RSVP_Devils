@@ -1,50 +1,325 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="/css/dashboard.css">
-    <link rel="stylesheet" href="css/DarkTheme.css">
-    <script src="js/theme-toggle.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSVP Devils</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/DarkTheme.css">
+  <script src="js/theme-toggle.js"></script>
 </head>
-
-<nav class="navbar">
+<body>
+  <nav class="navbar">
     <div class="hamburger" id="hamburger">&#9776;</div>
     <div class="logo">RSVP Devils</div>
+    <div class="nav-right">
+      <button id="theme-toggle-btn">🌙 Dark Mode</button>
+    </div>
+
     <div class="profile-btn" id="profileBtn">
       <i class="fas fa-user-circle"></i>
     </div>
-    <div class="nav-right">
-      <button id="theme-toggle-btn">🌙 Dark Mode</button>
-      <div class="hamburger" onclick="toggleMenu()"></div>
-    </div>
   </nav>
+  <div id="overlay" class="overlay"></div>
   
   <!-- Profile Dropdown -->
   <div class="profile-dropdown hidden" id="profileDropdown">
     <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
     <a href="#" id="dropdownLogout"><i class="fas fa-sign-out-alt"></i> Logout</a>
   </div>
+  
+  <!-- Slide Menu -->
+  <div class="nav-links" id="navMenu">
+    <a href="/index.html"><i class="fas fa-house"></i> Home</a>
+    <a href="/events.html"><i class="fas fa-calendar"></i> Events</a>
+    <a href="/reminders.html"><i class="fas fa-bell"></i> Reminders</a>
+    <a href="/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+  </div>
 
-<body>
-    <div class="container">
-        <div class="header">
-            <img src="/images/ASU Logos/Arizona-State-Sun-Devils-logo.png" alt="ASU Logo" class="asu-logo">
-            <h1>Users</h1>
-            <div>
-                <button id="refreshButton">Refresh List</button>
-                <button id="logoutButton">Log Out</button>
-            </div>
-        </div>
-        <div class="user-list" id="userList"></div>
+  <!-- Custom Popup Settings-->
+  <div id="customPopup" class="hidden">
+    <div class="popup-content">
+      <div class="popup-top-border" id="popupBorder"></div>
+      <div class="popup-icon" id="popupIcon"></div>
+      <div class="popup-message" id="popupMessage"></div>
+      <div class="popup-buttons" id="popupButtons"></div>
     </div>
-    <script src="/js/dashboard.js"></script>
-    <script src="/js/datamodel.js"></script>
-  <script src="/js/background.js"></script>
+  </div>
+
+  <!-- Save Modal-->
+   <div class="modal-overlay" id="saveModal">
+    <div class="modal-content">
+      <h3><i class="fas fa-floppy-disk" style="margin-right:8px;color:var(--asu-gold)"></i>Save Chart</h3>
+      <div class="field">
+        <label>Chart Name</label>
+        <input type="text" id="saveNameInput" placeholder="e.g. RSVP by Event Type">
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select id="saveCategoryInput">
+          <option value="parked">📦 Miscellaneous (unsorted)</option>
+          <option value="rsvp">📋 RSVP Charts</option>
+          <option value="event">📅 Event Charts</option>
+          <option value="user">👤 User Charts</option>
+        </select>
+      </div>
+      <div class="field" style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+        <input type="checkbox" id="saveSharedInput" style="width:auto;">
+        <lable style="margin:0;text-transform:none;font-size:13px;letter-spacing:0;">Share with all admins</lable>
+      </div>
+      <div class="modal-btns">
+        <button class="btn-maroon" onclick="confirmSave()"><i class="fas fa-check"></i> Save</button>
+        <button class="btn-ghost" onclick="closeSaveModal()">Cancel</button>
+      </div>
+    </div>
+   </div>
+
+   <!-- Page -->
+    <div class="page-wrapper">
+
+      <div class="status-row">
+        <h2><i class="fas fa-chart-bar" style="color:var(--asu-gold);margin-right:8px"></i>Admin Chart Builder</h2>
+        <div class="status-pill">
+          <div class="dot" id="backendDot"></div>
+          <span id="backendStatusText">Checking backend</span>
+        </div>
+      </div>
+
+      <!-- TOP ROW: Diagnositcs left,stat cards right -->
+       <div class="top-row">
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-flask"></i> Backend Diagnostics</div>
+          <div class="panel-body">
+            <div class="test-grid" id="testGrid">
+              <div class="test-btn" id="test-backend"   onclick="runTest('backend')"><i class="fas fa-server"></i><span>Backend Online</span><span class="test-status" id="status-backend">-</span></div>
+              <div class="test-btn" id="test-events-fetch" onclick="runTest('events-fetch')"><i class="fas fa-calendar-check"></i><span>Fetch Events</span><span class="test-status" id="status-events-fetch">—</span></div>
+              <div class="test-btn" id="test-event-create" onclick="runTest('event-create')"><i class="fas fa-calendar-plus"></i><span>Create Event</span><span class="test-status" id="status-event-create">—</span></div>
+              <div class="test-btn" id="test-event-delete" onclick="runTest('event-delete')"><i class="fas fa-calendar-minus"></i><span>Delete Event</span><span class="test-status" id="status-event-delete">—</span></div>
+              <div class="test-btn" id="test-rsvp"         onclick="runTest('rsvp')"><i class="fas fa-hand-pointer"></i><span>RSVP System</span><span class="test-status" id="status-rsvp">—</span></div>
+              <div class="test-btn" id="test-charts-db"    onclick="runTest('charts-db')"><i class="fas fa-database"></i><span>Charts DB</span><span class="test-status" id="status-charts-db">—</span></div>
+            </div>
+          </div>
+          <button class="run-all-btn" onclick="runAllTests()"><i class="fas fa-play"></i> Run All Tests</button>
+        </div>
+      </div>
+      <!--Stat Category cards-->
+      <div class="stat-categories">
+ 
+        <!-- RSVP Card -->
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-title"><i class="fas fa-hand-pointer"></i> RSVP Overview</div>
+            <span class="stat-card-badge badge-rsvp">RSVP</span>
+          </div>
+          <div class="stat-row">
+            <div class="stat-item">
+              <div class="stat-val loading" id="stat-rsvp-total">…</div>
+              <div class="stat-lbl">Total RSVPs</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-val loading" id="stat-rsvp-today">…</div>
+              <div class="stat-lbl">Today</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-val loading" id="stat-rsvp-unique">…</div>
+              <div class="stat-lbl">Unique Events</div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Event Card -->
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-title"><i class="fas fa-calendar-days"></i> Event Overview</div>
+            <span class="stat-card-badge badge-event">Events</span>
+          </div>
+          <div class="stat-row">
+            <div class="stat-item">
+              <div class="stat-val loading" id="stat-event-total">…</div>
+              <div class="stat-lbl">Total Events</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-val loading" id="stat-event-upcoming">…</div>
+              <div class="stat-lbl">Upcoming</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-val loading" id="stat-event-past">…</div>
+              <div class="stat-lbl">Past</div>
+            </div>
+          </div>
+        </div>
+
+         <!-- User Card -->
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <div class="stat-card-title"><i class="fas fa-users"></i> User Overview</div>
+            <span class="stat-card-badge badge-user">Users</span>
+          </div>
+          <div class="stat-row">
+            <div class="stat-item">
+              <div class="stat-val loading" id="stat-user-total">…</div>
+              <div class="stat-lbl">Total Users</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-val loading" id="stat-user-new">…</div>
+              <div class="stat-lbl">New (30d)</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-val loading" id="stat-user-active">…</div>
+              <div class="stat-lbl">Have RSVP'd</div>
+            </div>
+          </div>
+        </div>
+ 
+      </div><!-- end stat-categories -->
+    </div><!-- end top-row -->
+
+
+    <!-- ── BUILDER ── -->
+    <div class="section-title"><i class="fas fa-pencil-ruler"></i> Build a Chart</div>
+    <div class="builder-layout">
+ 
+      <div class="panel">
+        <div class="panel-header"><i class="fas fa-sliders"></i> Configuration</div>
+        <div class="panel-body">
+          <div class="field">
+            <label>Data Category</label>
+            <select id="dataCategory" onchange="onCategoryChange()">
+              <option value="">— select data category —</option>
+              <option value="rsvp">📋 RSVP Data</option>
+              <option value="event">📅 Event Data</option>
+              <option value="user">👤 User Data</option>
+            </select>
+          </div>
+          <div class="field">
+    <label>Table</label>
+    <select id="tableSelect" onchange="onTableChange()">
+        <option value="">— select table —</option>
+    </select>
+</div>
+
+<div class="field" id="joinTableField" style="display:none;">
+    <label>Join Table <span style="font-weight:400;color:#999;text-transform:none;">(optional)</span></label>
+    <select id="joinTableSelect" onchange="onJoinTableChange()">
+        <option value="">— none —</option>
+    </select>
+</div>
+
+<div class="field">
+    <label>X Axis (Category)</label>
+            <select id="xAxis"><option value="">— select column —</option></select>
+          </div>
+          <div class="field">
+            <label>Y Axis (Value)</label>
+            <select id="yAxis"><option value="">— select column —</option></select>
+          </div>
+          <div class="field">
+            <label>Aggregate Function</label>
+            <select id="aggFunc">
+              <option value="COUNT">COUNT</option>
+              <option value="SUM">SUM</option>
+              <option value="AVG">AVG</option>
+              <option value="MAX">MAX</option>
+              <option value="MIN">MIN</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Chart Type</label>
+            <div class="chart-types">
+              <button class="chart-type-btn active" data-type="bar"      onclick="selectChartType(this)"><span class="icon">▮▮</span>Bar</button>
+              <button class="chart-type-btn"        data-type="line"     onclick="selectChartType(this)"><span class="icon">📈</span>Line</button>
+              <button class="chart-type-btn"        data-type="pie"      onclick="selectChartType(this)"><span class="icon">◕</span>Pie</button>
+              <button class="chart-type-btn"        data-type="doughnut" onclick="selectChartType(this)"><span class="icon">◎</span>Donut</button>
+            </div>
+          </div>
+          <hr class="divider">
+          <button class="btn-full" onclick="buildChart()" id="buildBtn"><i class="fas fa-bolt"></i> Generate Chart</button>
+          <button class="btn-full btn-ghost" onclick="openSaveModal()" id="saveBtn" disabled><i class="fas fa-floppy-disk"></i> Save Chart</button>
+          <div class="status-bar"><div class="status-dot"></div><span id="statusText">Ready — select a category to begin</span></div>
+        </div>
+      </div>
+ 
+      <div class="right-col">
+        <div class="panel">
+          <div class="chart-preview-header">
+            <input type="text" class="chart-title-input" id="chartTitle" placeholder="Untitled Chart">
+            <div class="chart-icon-btns">
+              <button class="icon-btn" onclick="downloadChart()" title="Download PNG"><i class="fas fa-download"></i></button>
+              <button class="icon-btn" onclick="clearChart()"    title="Clear"><i class="fas fa-xmark"></i></button>
+            </div>
+          </div>
+          <div class="chart-area">
+            <div class="chart-placeholder" id="placeholder">
+              <div class="big-icon"><i class="fas fa-chart-column"></i></div>
+              <p>Configure and click <strong>Generate Chart</strong></p>
+            </div>
+            <canvas id="myChart" style="display:none;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- PARKING ZONE -->
+    <div class="section-title"><i class="fas fa-square-parking"></i> Miscellaneous <small style="font-size:12px;font-weight:400;color:#999;margin-left:6px;">Drag charts here to sort later</small></div>
+    <div class="parking-zone" style="margin-bottom:28px;">
+      <div class="panel-header" style="background:#6c5a00;">
+        <span class="lane-title"><i class="fas fa-square-parking"></i> Unsorted / Staging</span>
+        <span class="lane-count" id="count-parked">0</span>
+      </div>
+      <div class="lane-drop-zone" id="zone-parked" data-zone="parked"
+           ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave(event)">
+        <div class="lane-empty"><i class="fas fa-inbox"></i>Newly saved charts appear here — drag them to a category below</div>
+      </div>
+    </div>
+
+    <!-- CATEGORY LANES -->
+    <div class="section-title"><i class="fas fa-folder-open"></i> Chart Categories</div>
+    <div class="cat-tabs">
+      <button class="cat-tab active" data-filter="all"   onclick="filterLanes(this)"><i class="fas fa-border-all"></i> All</button>
+      <button class="cat-tab"        data-filter="rsvp"  onclick="filterLanes(this)"><i class="fas fa-hand-pointer"></i> RSVP</button>
+      <button class="cat-tab"        data-filter="event" onclick="filterLanes(this)"><i class="fas fa-calendar"></i> Events</button>
+      <button class="cat-tab"        data-filter="user"  onclick="filterLanes(this)"><i class="fas fa-user"></i> Users</button>
+    </div>
+    <div class="graph-lanes" id="graphLanes">
+      <div class="graph-lane" data-lane="rsvp">
+        <div class="lane-header">
+          <span class="lane-title"><i class="fas fa-hand-pointer"></i> RSVP Charts</span>
+          <span class="lane-count" id="count-rsvp">0</span>
+        </div>
+        <div class="lane-drop-zone" id="zone-rsvp" data-zone="rsvp"
+             ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave(event)">
+          <div class="lane-empty"><i class="fas fa-chart-bar"></i>Drag RSVP-related charts here</div>
+        </div>
+      </div>
+      <div class="graph-lane" data-lane="event">
+        <div class="lane-header">
+          <span class="lane-title"><i class="fas fa-calendar-days"></i> Event Charts</span>
+          <span class="lane-count" id="count-event">0</span>
+        </div>
+        <div class="lane-drop-zone" id="zone-event" data-zone="event"
+             ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave(event)">
+          <div class="lane-empty"><i class="fas fa-chart-pie"></i>Drag Event-related charts here</div>
+        </div>
+      </div>
+      <div class="graph-lane" data-lane="user">
+        <div class="lane-header">
+          <span class="lane-title"><i class="fas fa-users"></i> User Charts</span>
+          <span class="lane-count" id="count-user">0</span>
+        </div>
+        <div class="lane-drop-zone" id="zone-user" data-zone="user"
+             ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave(event)">
+          <div class="lane-empty"><i class="fas fa-chart-line"></i>Drag User-related charts here</div>
+        </div>
+      </div>
+    </div>
+  </div>
+<script src="js/navbar.js"></script>
+<script src="js/chart-builder.js"></script>
+<script src="js/background.js"></script>
 </body>
 </html>
-
-
-
-

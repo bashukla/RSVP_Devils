@@ -511,6 +511,7 @@ app.put(
 // Route: Delete Event
 
 const fs = require('fs');
+const { connect } = require('http2');
 app.delete('/api/events/:id', authenticateToken, async (req, res) => {
     const eventId = req.params.id;
 
@@ -1098,4 +1099,376 @@ app.get('/api/user-info', authenticateToken, async (req, res) => {
 // Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
+});
+
+//Health Check Functions (dashboard)
+app.get('/api/health', async (req, res) => {
+    try {
+        const connection = await createConnection();
+        await connection.execute('SELECT 1');
+        await connection.end();
+        res.json({ status: 'ok', db: 'connected'});
+    } catch (error){
+        console.error('Health check error:', error)
+        res.status(503).json({ status: 'error', message: error.message});
+    }
+});
+
+
+//get all table names for builder dropdown
+app.get('/api/tables', async (req, res) => {
+    try{
+        const connection = await createConnection();
+        const [rows] = await connection.execute('SHOW TABLES');
+        await connection.end();
+        const key = Object.keys(rows[0][0]);
+        res.json({ tables: rows.map(r => r[key]) });
+    } catch (error) {
+        console.error('Error fetching tables:', error);
+        res.status(500).json({ message: 'Error fetching tables'});
+    }
+});
+
+//Column List
+app.get('/api/columns/:table', async (req, res) =>{
+    try{
+        const connection = await createConnection();
+        const tableName = req.params.table.replace(/[^a-zA-Z0-9_]/g, '');
+        const [rows] = await connection.execute(`DESCRIBE \`${tableName}\``);
+        await connection.end();
+        res.json({ columns: rows.map(r => r.Field) });
+    } catch (error) {
+        console.error('Error fetching columns:', error);
+        res.status(500).json({ message: 'Error fetching columns.'});
+    }
+});
+
+// Chart Data Query — supports optional JOIN
+app.post('/api/chart-data', async (req, res) => {
+    const { table, joinTable, xCol, yCol, agg } = req.body;
+
+    const ALLOWED_AGG = ['COUNT', 'SUM', 'AVG', 'MAX', 'MIN'];
+    if (!ALLOWED_AGG.includes(agg))
+        return res.status(400).json({ message: 'Invalid aggregate function.' });
+    if (!table || !xCol || !yCol)
+        return res.status(400).json({ message: 'table, xCol and yCol are required.' });
+
+    // Sanitize all identifiers
+    const safeTable     = table.replace(/[^a-zA-Z0-9_]/g, '');
+    const safeX         = xCol.replace(/[^a-zA-Z0-9_.]/g, '');   // allow dot for table.col
+    const safeY         = yCol.replace(/[^a-zA-Z0-9_.]/g, '');
+    const safeJoinTable = joinTable ? joinTable.replace(/[^a-zA-Z0-9_]/g, '') : null;
+
+    // Known join relationships — automatic, no user input needed
+    const JOIN_MAP = {
+        'registration:events':      'registration.event_id = events.event_id',
+        'events:registration':      'registration.event_id = events.event_id',
+        'registration:user':        'registration.user_id = user.user_id',
+        'user:registration':        'registration.user_id = user.user_id',
+        'events:user':              'events.created_by = user.user_id',
+        'user:events':              'events.created_by = user.user_id',
+        'user_reminders:events':    'user_reminders.event_id = events.event_id',
+        'events:user_reminders':    'user_reminders.event_id = events.event_id',
+        'user_reminders:user':      'user_reminders.user_id = user.user_id',
+        'user:user_reminders':      'user_reminders.user_id = user.user_id',
+    };
+
+    try {
+        const connection = await createConnection();
+        let sql;
+
+        if (safeJoinTable) {
+            const joinKey = JOIN_MAP[`${safeTable}:${safeJoinTable}`];
+            if (!joinKey) {
+                await connection.end();
+                return res.status(400).json({ message: `No known relationship between "${safeTable}" and "${safeJoinTable}".` });
+            }
+
+            sql = `
+                SELECT ${safeX} AS label, ${agg}(${safeY}) AS value
+                FROM   \`${safeTable}\`
+                JOIN   \`${safeJoinTable}\` ON ${joinKey}
+                GROUP  BY ${safeX}
+                ORDER  BY value DESC
+                LIMIT  50
+            `;
+        } else {
+            // Single table — original behavior
+            sql = `
+                SELECT \`${safeX}\` AS label, ${agg}(\`${safeY}\`) AS value
+                FROM   \`${safeTable}\`
+                GROUP  BY \`${safeX}\`
+                ORDER  BY value DESC
+                LIMIT  50
+            `;
+        }
+
+        const [rows] = await connection.execute(sql);
+        await connection.end();
+
+        res.json({
+            labels: rows.map(r => String(r.label ?? 'NULL')),
+            values: rows.map(r => parseFloat(r.value) || 0),
+        });
+    } catch (error) {
+        console.error('Error fetching chart data:', error);
+        res.status(500).json({ message: 'Error fetching chart data.' });
+    }
+});
+
+
+//Stat Cards
+app.get('/api/admin/stats/users', async (req, res) => {
+    let connection;
+    try {
+        connection = await createConnection();
+ 
+        let total = 0, active = 0, withRsvp = 0, new30d = 0;
+         try {
+            const [[row]] = await connection.execute(
+                'SELECT COUNT(*) AS cnt FROM user WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)'
+            );
+            new30d = row.cnt;
+        } catch (e) { console.error('stats new30d:', e.message); }
+ 
+        try {
+            const [[row]] = await connection.execute('SELECT COUNT(*) AS cnt FROM user');
+            total = row.cnt;
+        } catch (e) { console.error('stats total:', e.message); }
+ 
+        try {
+            const [[row]] = await connection.execute('SELECT COUNT(DISTINCT user_id) AS cnt FROM registration');
+            active = row.cnt;
+        } catch (e) { console.error('stats active:', e.message); }
+ 
+        try {
+            const [[row]] = await connection.execute('SELECT COUNT(DISTINCT user_id) AS cnt FROM user_reminders WHERE is_active = 1');
+            withRsvp = row.cnt;
+        } catch (e) { console.error('stats withRsvp:', e.message); }
+ 
+        await connection.end();
+        res.json({ total, active, withRsvp, new30d });
+ 
+    } catch (error) {
+        console.error('Error fetching user stats:', error);
+        res.status(500).json({ message: 'Error fetching user stats.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+//Get todays RSVP count
+app.get('/api/admin/stats/rsvp-today', async (req, res) => {
+    let connection;
+    try {
+        connection = await createConnection();
+        const [[row]] = await connection.execute(
+            'SELECT COUNT(*) AS cnt FROM registration WHERE DATE(reg_at) = CURDATE()'
+        );
+        await connection.end();
+        res.json({ count: row.cnt });
+    } catch (error) {
+        console.error('Error fetching today RSVP count:', error);
+        res.status(500).json({ message: 'Error fetching today RSVP count.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+
+//Get Saved Charts from the Database
+app.get('/api/saved-charts', async (req, res) => {
+    let connection;
+    try {
+        connection = await createConnection();
+ 
+        const createdBy = req.query.user || null;
+        let rows;
+ 
+        if (createdBy) {
+            [rows] = await connection.execute(
+                'SELECT * FROM saved_charts WHERE shared = 1 OR created_by = ? ORDER BY created_at DESC',
+                [createdBy]
+            );
+        } else {
+            [rows] = await connection.execute(
+                'SELECT * FROM saved_charts ORDER BY created_at DESC'
+            );
+        }
+ 
+        await connection.end();
+ 
+        const charts = rows.map(r => ({
+            id:           r.id,
+            name:         r.name,
+            category:     r.category,
+            chartType:    r.chart_type,
+            table:        r.table_name,
+            xCol:         r.x_col,
+            yCol:         r.y_col,
+            agg:          r.agg_func,
+            dataCategory: r.data_category,
+            labels:       JSON.parse(r.labels_json || '[]'),
+            values:       JSON.parse(r.values_json || '[]'),
+            shared:       !!r.shared,
+            createdBy:    r.created_by,
+            createdAt:    new Date(r.created_at).toLocaleDateString(),
+        }));
+ 
+        res.json({ charts });
+    } catch (error) {
+        console.error('Error fetching saved charts:', error);
+        res.status(500).json({ message: 'Error fetching saved charts.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+
+// Saved Charts Create
+app.post('/api/saved-charts', authenticateToken, async (req,res) =>{
+    const {
+        name, category, chartType, table, xCol, yCol,
+        agg, dataCategory, labels, values, shared
+    } = req.body;
+
+    if(!name) {
+        return res.status(400).json({ message: 'Chart name is required. '});
+    }
+
+    let connection;
+    try {
+        connection = await createConnection();
+
+        const [result] = await connection.execute(
+            `INSERT INTO saved_charts
+            (name, category, chart_type, table_name, x_col, y_col,
+            agg_func, data_category, labels_json, values_json, shared, created_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                name,
+                category || 'Misc',
+                chartType || null,
+                table || null,
+                xCol || null,
+                yCol || null,
+                agg || null,
+                dataCategory || null,
+                JSON.stringify(labels || []),
+                JSON.stringify(values || []),
+                shared ? 1 : 0,
+                req.user.email,
+            ]
+        );
+        await connection.end();
+        res.status(201).json({ success: true, id: result.insertId });
+    } catch (error) {
+        console.error('Error saving chart:', error);
+        res.status(500).json({ message: 'Error saving chart.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+//Saved Charts Delete
+app.delete('/api/saved-charts/:id', authenticateToken, async (req, res) => {
+    let connection;
+    try {
+        connection = await createConnection();
+        const [result] = await connection.execute(
+            'DELETE FROM saved_charts WHERE id = ?',
+            [req.params.id] 
+        );
+        await connection.end();
+
+        if (result.affectedRows === 0 ) {
+            return res.status(404).json({ message: 'Chart not found.' });
+        }
+        res.json({ message: 'Chart deleted successfuly.'});
+    } catch (error) {
+        console.error('Error deleting chart:', error);
+        res.status(500).json({ message: 'Error deleting chart.'});
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+//Saved Charts Move Category (drag and drop function)
+app.patch('/api/saved-charts/:id/category', authenticateToken, async (req, res) => {
+    const {category} = req.body;
+    const VALID_CATS = ['parked', 'rsvp', 'event', 'user'];
+
+    if(!VALID_CATS.includes(category)) {
+        return res.status(400).json({message: 'Invalid category'});
+    }
+
+    let connection;
+    try {
+        connection = await createConnection();
+        await connection.execute(
+            'UPDATE saved_charts SET category = ? WHERE id = ?',
+            [category, req.params.id]
+        );
+        await connection.end();
+        res.json({ message: 'Category updated. '});
+    } catch (error) {
+        console.error('Error updating category:', error);
+        res.status(500).json({message: 'Error updating category.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+//Toggle chart sharing
+app.patch('/api/saved-charts/:id/share', authenticateToken, async (req,res) => {
+    const {shared} = req.body;
+
+    let connection;
+    try {
+        connection = await createConnection();
+        await connection.execute(
+            'UPDATE saved_charts SET shared = ? WHERE id = ?',
+            [shared ? 1:0, req.params.id]
+        );
+        await connection.end();
+        res.json({ message: `Chart ${shared ? 'shared' : 'unshared'} successfully.`});
+    } catch (error) {
+        console.error('Error updating share status:', error);
+        res.status(500).json({ message: 'Error updating share status.'});
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+app.get('/api/admin/stats/users', async (req, res) => {
+    let connection;
+    try {
+        connection = await createConnection();
+ 
+        const [[totalRow]] = await connection.execute(
+            'SELECT COUNT(*) AS cnt FROM user'
+        );
+ 
+        // Users who have at least one registration (active users)
+        const [[activeRow]] = await connection.execute(
+            'SELECT COUNT(DISTINCT user_id) AS cnt FROM registration'
+        );
+ 
+        // Users who have an active reminder
+        const [[reminderRow]] = await connection.execute(
+            'SELECT COUNT(DISTINCT user_id) AS cnt FROM user_reminders WHERE is_active = 1'
+        );
+ 
+        await connection.end();
+        res.json({
+            total:      totalRow.cnt,
+            active:     activeRow.cnt,
+            withRsvp:   reminderRow.cnt,
+        });
+    } catch (error) {
+        console.error('Error fetching user stats:', error);
+        res.status(500).json({ message: 'Error fetching user stats.' });
+    } finally {
+        if (connection) await connection.end();
+    }
 });
