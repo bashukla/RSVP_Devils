@@ -529,7 +529,6 @@ app.put(
 
 // Route: Delete Event
 
-const fs = require('fs');
 const { connect } = require('http2');
 app.delete('/api/events/:id', authenticateToken, async (req, res) => {
     const eventId = req.params.id;
