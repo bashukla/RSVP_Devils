@@ -5,6 +5,13 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = '/logon.html';
         return;
     }
+
+    // Respect notification preferences
+    const prefs = JSON.parse(localStorage.getItem('notifPrefs') || '{}');
+    const remindersEnabled = prefs.reminders !== false;
+    const emailCheckbox = document.getElementById('emailReminders');
+    if (emailCheckbox) emailCheckbox.checked = remindersEnabled;
+
     loadReminders();
     loadUserEmail();
 });

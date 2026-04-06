@@ -71,6 +71,7 @@ function getEmailFromToken() {
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('accountEmail').textContent = getEmailFromToken();
+    loadNotificationPrefs();
 });
 
 // ── PASSWORD SECTION TOGGLE ────────────────────────────────
@@ -133,8 +134,21 @@ function saveAccountInfo() {
 }
 
 // ── NOTIFICATIONS ──────────────────────────────────────────
+function loadNotificationPrefs() {
+    const prefs = JSON.parse(localStorage.getItem('notifPrefs') || '{}');
+    document.getElementById('toggleReminders').checked   = prefs.reminders   !== false;
+    document.getElementById('toggleNewEvents').checked   = prefs.newEvents    !== false;
+    document.getElementById('toggleConfirmations').checked = prefs.confirmations !== false;
+}
+
 function saveNotifications() {
-    showPopup('success', 'Notification preferences updated!');
+    const prefs = {
+        reminders:     document.getElementById('toggleReminders').checked,
+        newEvents:     document.getElementById('toggleNewEvents').checked,
+        confirmations: document.getElementById('toggleConfirmations').checked
+    };
+    localStorage.setItem('notifPrefs', JSON.stringify(prefs));
+    showPopup('success', 'Notification preferences saved!');
 }
 
 // ── DELETE ACCOUNT ─────────────────────────────────────────

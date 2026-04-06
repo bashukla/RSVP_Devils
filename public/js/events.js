@@ -240,7 +240,7 @@ function renderEvents(events) {
         </div>
 
         <div class="card-body">
-          <img src="${event.image ? `/images/uploads/${event.image}` : '/images/ASU Logos/Arizona-State-Sun-Devils-logo.png'}" class="event-image">
+          <img src="${event.image ? `/uploads/${event.image}` : '/images/ASU Logos/Arizona-State-Sun-Devils-logo.png'}" class="event-image">
             <h3 class="event-title">${event.description}</h3>
             <div class="event-details"><strong>Date:</strong> ${dateStr}</div>
             <div class="event-details"><strong>Time:</strong> ${timeStr}</div>
@@ -338,7 +338,11 @@ function attachCardListeners(token) {
                     showPopup('success', 'RSVP cancelled successfully!');
                 } else {
                     userRSVPs.push(eventId);
-                    showPopup('success', 'RSVP successful!');
+                    const prefs = JSON.parse(localStorage.getItem('notifPrefs') || '{}');
+                    const msg = prefs.confirmations !== false
+                        ? 'RSVP successful! A confirmation email will be sent to you.'
+                        : 'RSVP successful!';
+                    showPopup('success', msg);
                 }
 
                 await loadEvents(token);
