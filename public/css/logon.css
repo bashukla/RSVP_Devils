@@ -104,3 +104,12 @@ input {
 .error {
     color: red;
 }
+.forgot-link {
+    color: #8C1D40;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+}
+.forgot-link:hover {
+    text-decoration: underline;
+}

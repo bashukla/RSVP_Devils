@@ -26,6 +26,7 @@ const port = 3000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve static files from the "public" folder
 app.use('/css', express.static('public/css'));
@@ -261,49 +262,101 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ message: 'Error logging in.' });
     }
 });
+// Forgot Password 
+const crypto = require('crypto'); // add at top if not already
 
-// Route: Get All Email Addresses
-function authenticateToken(req, res, next) {
+app.post('/api/forgot-password', async (req, res) => {
+    const { email } = req.body;
 
-    const authHeader = req.headers['authorization'];
-    
+    let connection;
+    try {
+        connection = await createConnection();
 
-    if (!authHeader) {
-        return res.status(401).json({ message: 'Access denied. No token provided.' });
-    }
+        // Check if user exists
+        const [rows] = await connection.execute(
+            'SELECT * FROM user WHERE email = ?',
+            [email]
+        );
 
-    const token = authHeader.split(' ')[1]; // removes "Bearer "
-
-    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-        if (err) {
-            return res.status(403).json({ message: 'Invalid token.' });
-        }
-
-        try {
-            const connection = await createConnection();
-
-            const [rows] = await connection.execute(
-                'SELECT email FROM user WHERE email = ?',
-                [decoded.email]
-            );
-
+        if (rows.length === 0) {
             await connection.end();
-
-            if (rows.length === 0) {
-                return res.status(403).json({ message: 'Account not found or deactivated.' });
-            }
-
-            req.user = decoded;
-            next();
-
-        } catch (dbError) {
-            console.error(dbError);
-            res.status(500).json({ message: 'Database error during authentication.' });
+            return res.status(400).json({ message: 'User not found' });
         }
-    });
-    
-    
-}
+
+        // Generate token
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiry = new Date(Date.now() + 3600000); // 1 hour
+
+        // Save token in DB
+        await connection.execute(
+            'UPDATE user SET reset_token = ?, reset_token_expiry = ? WHERE email = ?',
+            [token, expiry, email]
+        );
+
+        await connection.end();
+
+        const resetLink = `http://localhost:3000/reset-password.html?token=${token}`;
+
+        await sendEmail(
+            email,
+            "Password Reset",
+            `<p>Click below to reset your password:</p>
+             <a href="${resetLink}">${resetLink}</a>`
+        );
+
+        res.json({ message: 'Reset link sent to email' });
+
+    } catch (error) {
+        console.error(error);
+        if (connection) await connection.end();
+        res.status(500).json({ message: 'Error processing request' });
+    }
+});
+
+//reset password 
+app.post('/api/reset-password', async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    let connection;
+    try {
+        connection = await createConnection();
+
+        const [rows] = await connection.execute(
+            'SELECT * FROM user WHERE reset_token = ? AND reset_token_expiry > NOW()',
+            [token]
+        );
+
+        if (rows.length === 0) {
+            await connection.end();
+            return res.status(400).json({ message: 'Invalid or expired token' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await connection.execute(
+            'UPDATE user SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?',
+            [hashedPassword, token]
+        );
+
+        const email = rows[0].email;
+
+        await connection.end();
+
+        await sendEmail(
+            email,
+            "Password Changed",
+            "<p>Your password has been successfully updated.</p>"
+        );
+
+        res.json({ message: 'Password updated successfully' });
+
+    } catch (error) {
+        console.error(error);
+        if (connection) await connection.end();
+        res.status(500).json({ message: 'Error resetting password' });
+    }
+});
+
 
 // Route Get All Events 
 app.get('/api/events', async (req, res) => {
