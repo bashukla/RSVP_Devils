@@ -25,7 +25,28 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const toggleNew = document.getElementById('toggle-new');
     const toggleConfirm = document.getElementById('toggle-confirm');
-    
+    const matchText = document.getElementById('match-text');
+
+    function checkPasswordMatch() {
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (!confirmPassword) {
+            matchText.textContent = '';
+            return;
+        }
+
+        if (newPassword === confirmPassword) {
+            matchText.textContent = "Passwords match";
+            matchText.className = "match";
+        } else {
+            matchText.textContent = "Passwords do not match";
+            matchText.className = "no-match";
+        }
+    }
+
+newPasswordInput.addEventListener('input', checkPasswordMatch);
+confirmPasswordInput.addEventListener('input', checkPasswordMatch);
     if (toggleNew) {
         toggleNew.addEventListener('click', () => {
             newPasswordInput.type =
@@ -76,14 +97,64 @@ document.addEventListener('DOMContentLoaded', () => {
     
         const toast = document.createElement("div");
         toast.classList.add("toast", type);
-        toast.textContent = message;
+    
+        const icon = type === "success" ? "✔" : "⚠";
+    
+        toast.innerHTML = `
+            <span class="toast-icon">${icon}</span>
+            <span>${message}</span>
+        `;
     
         container.appendChild(toast);
     
+        setTimeout(() => toast.classList.add("show"), 10);
+    
         setTimeout(() => {
-            toast.remove();
+            toast.classList.remove("show");
+            setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
+    function toggleSubmitButton() {
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+    
+        const isValid = newPassword &&
+                        confirmPassword &&
+                        newPassword === confirmPassword;
+    
+        btn.disabled = !isValid;
+    }
+    function launchConfetti() {
+        const colors = ['#FFC107', '#8C1D40', '#4CAF50', '#2196F3'];
+    
+        for (let i = 0; i < 60; i++) {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.width = '6px';
+            confetti.style.height = '6px';
+            confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.top = '0px';
+            confetti.style.left = Math.random() * window.innerWidth + 'px';
+            confetti.style.opacity = Math.random();
+            confetti.style.zIndex = '9999';
+            confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+    
+            document.body.appendChild(confetti);
+    
+            const fall = confetti.animate([
+                { transform: `translateY(0)` },
+                { transform: `translateY(${window.innerHeight}px)` }
+            ], {
+                duration: 1500 + Math.random() * 1000,
+                easing: 'ease-out'
+            });
+    
+            fall.onfinish = () => confetti.remove();
+        }
+    }
+    
+    newPasswordInput.addEventListener('input', toggleSubmitButton);
+    confirmPasswordInput.addEventListener('input', toggleSubmitButton);
     confirmPasswordInput.addEventListener('input', () => {
         if (confirmPasswordInput.value && newPasswordInput.value !== confirmPasswordInput.value) {
             confirmPasswordInput.style.border = "1px solid red";
@@ -102,6 +173,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // PASSWORD MATCH CHECK
         if (newPassword !== confirmPassword) {
             showToast("Passwords do not match", "error");
+        
+            form.classList.add("shake");
+        
+            setTimeout(() => {
+                form.classList.remove("shake");
+            }, 300);
+        
             return;
         }
     
@@ -124,11 +202,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
     
             if (response.ok) {
+                launchConfetti();
+
                 showToast("Password reset successful!", "success");
-    
+
+                // Redirect UI state
+                btn.disabled = true;
+                btnText.textContent = "Redirecting...";
+                spinner.classList.remove('hidden');
+
+                // Fade out page
+                setTimeout(() => {
+                    document.body.classList.add('fade-out');
+                }, 1200);
+
+                // Redirect after fade
                 setTimeout(() => {
                     window.location.href = '/logon.html';
-                }, 2000);
+                }, 1800);
     
             } else {
                 showToast(result.message || "Reset failed", "error");
