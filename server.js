@@ -1188,7 +1188,7 @@ app.get('/api/tables', async (req, res) => {
         const connection = await createConnection();
         const [rows] = await connection.execute('SHOW TABLES');
         await connection.end();
-        const key = Object.keys(rows[0][0]);
+        const key = Object.keys(rows[0])[0];
         res.json({ tables: rows.map(r => r[key]) });
     } catch (error) {
         console.error('Error fetching tables:', error);
@@ -1414,7 +1414,7 @@ app.post('/api/saved-charts', authenticateToken, async (req,res) =>{
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 name,
-                category || 'Misc',
+                category || 'parked',
                 chartType || null,
                 table || null,
                 xCol || null,
@@ -1502,39 +1502,6 @@ app.patch('/api/saved-charts/:id/share', authenticateToken, async (req,res) => {
     } catch (error) {
         console.error('Error updating share status:', error);
         res.status(500).json({ message: 'Error updating share status.'});
-    } finally {
-        if (connection) await connection.end();
-    }
-});
-
-app.get('/api/admin/stats/users', async (req, res) => {
-    let connection;
-    try {
-        connection = await createConnection();
- 
-        const [[totalRow]] = await connection.execute(
-            'SELECT COUNT(*) AS cnt FROM user'
-        );
- 
-        // Users who have at least one registration (active users)
-        const [[activeRow]] = await connection.execute(
-            'SELECT COUNT(DISTINCT user_id) AS cnt FROM registration'
-        );
- 
-        // Users who have an active reminder
-        const [[reminderRow]] = await connection.execute(
-            'SELECT COUNT(DISTINCT user_id) AS cnt FROM user_reminders WHERE is_active = 1'
-        );
- 
-        await connection.end();
-        res.json({
-            total:      totalRow.cnt,
-            active:     activeRow.cnt,
-            withRsvp:   reminderRow.cnt,
-        });
-    } catch (error) {
-        console.error('Error fetching user stats:', error);
-        res.status(500).json({ message: 'Error fetching user stats.' });
     } finally {
         if (connection) await connection.end();
     }
