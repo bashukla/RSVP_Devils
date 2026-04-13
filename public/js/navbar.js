@@ -62,3 +62,21 @@ document.addEventListener("DOMContentLoaded", () => {
 function goDashboard() {
     window.location.href = "/index.html";
 }
+
+// Auto logout on expired token
+function handleExpiredToken() {
+    localStorage.removeItem("jwtToken");
+    window.location.href = "/logon.html?reason=expired";
+}
+
+// Check token expiry on every page load
+(function checkTokenExpiry() {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) return;
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp && Date.now() / 1000 > payload.exp) {
+            handleExpiredToken();
+        }
+    } catch(e) {}
+})();

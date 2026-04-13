@@ -10,6 +10,8 @@
   box-sizing: border-box;
 }
 
+img { max-width: 100%; height: auto; }
+
 html, body {
   margin: 0;
   padding: 0;
@@ -178,6 +180,14 @@ body {
   .campus-banner { flex-direction: column; padding: 15px; }
   .campus-banner .asu-logo { height: 45px; }
   .campus-banner .banner-text h1 { font-size: 18px; }
+  .settings-wrapper { width: 95%; margin: 15px auto 30px; }
+  .card-body { padding: 15px; }
+  .toggle-row { flex-wrap: wrap; gap: 10px; }
+  .bg-picker { gap: 8px; }
+  .bg-option { width: 60px; height: 42px; }
+  .bg-upload-zone { max-width: 100%; }
+  .save-row { justify-content: stretch; }
+  .save-row .btn { width: 100%; }
 }
 
 /* ── PAGE LAYOUT ── */

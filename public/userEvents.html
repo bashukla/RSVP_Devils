@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSVP Devils | My Events</title>
+  <link rel="icon" type="image/svg+xml" href="/images/asu-2.svg">
+  <!-- events.css provides navbar, banner, overlay, popup base styles -->
+  <link rel="stylesheet" href="css/events.css">
+  <!-- userEvents.css adds page-specific layout and overrides -->
+  <link rel="stylesheet" href="css/userEvents.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/DarkTheme.css">
+  <script src="js/theme-toggle.js"></script>
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <div class="hamburger" id="hamburger">&#9776;</div>
+    <div class="logo">RSVP Devils</div>
+    <div class="nav-right">
+      <button id="theme-toggle-btn">🌙 Dark Mode</button>
+      <div class="hamburger" onclick="toggleMenu()"></div>
+    </div>
+    <div class="profile-btn" id="profileBtn">
+      <i class="fas fa-user-circle"></i>
+    </div>
+  </nav>
+
+  <!-- Profile Dropdown -->
+  <div class="profile-dropdown hidden" id="profileDropdown">
+    <a href="/userSettings.html"><i class="fas fa-user-gear"></i> Settings</a>
+    <a href="#" id="dropdownLogout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+
+  <!-- Slide Menu -->
+  <div class="nav-links" id="navMenu">
+    <a href="/index.html"><i class="fas fa-house"></i> Home</a>
+    <a href="/events.html"><i class="fas fa-calendar"></i> Events</a>
+    <a href="/reminders.html"><i class="fas fa-bell"></i> Reminders</a>
+    <a href="/dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="/userEvents.html" class="active"><i class="fas fa-user"></i> My Events</a>
+  </div>
+
+  <!-- Dark overlay -->
+  <div id="overlay" class="overlay"></div>
+
+  <!-- Campus Banner -->
+  <div class="campus-banner">
+    <img src="/images/ASU Logos/Arizona-State-Sun-Devils-logo.png" alt="ASU Logo" class="asu-logo">
+    <div class="banner-text">
+      <h1>My Events</h1>
+      <p class="subtitle">Your upcoming RSVPs, past attendance, and activity stats.</p>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Upcoming RSVPs</div>
+      <div class="stat-value" id="statUpcoming">—</div>
+      <div class="stat-sub" id="statNextDate">Loading...</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Events attended</div>
+      <div class="stat-value" id="statAttended">—</div>
+      <div class="stat-sub">This semester</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Attendance rate</div>
+      <div class="stat-value" id="statRate">—</div>
+      <div class="stat-sub" id="statRateSub">of RSVPs attended</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Favorite category</div>
+      <div class="stat-value stat-value--sm" id="statFavorite">—</div>
+      <div class="stat-sub" id="statFavSub"></div>
+    </div>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="main-layout">
+
+    <!-- Left: Events List -->
+    <div class="events-column">
+      <div class="section-header">
+        <h2 class="section-title">My Events</h2>
+        <div class="toggle-container">
+          <button id="upcomingBtn" class="active">Upcoming</button>
+          <button id="pastBtn">Past</button>
+        </div>
+      </div>
+      <div class="events-container" id="userEventList">
+        <div class="empty-message">Loading your events...</div>
+      </div>
+    </div>
+
+    <!-- Right: Calendar + Category Chart -->
+    <div class="sidebar-column">
+
+      <!-- Mini Calendar -->
+      <div class="sidebar-card" id="calendarCard">
+        <div class="cal-month-nav">
+          <button class="cal-nav-btn" id="calPrev"><i class="fas fa-chevron-left"></i></button>
+          <span class="cal-month-label" id="calMonthLabel"></span>
+          <button class="cal-nav-btn" id="calNext"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-dow">Su</div>
+          <div class="cal-dow">Mo</div>
+          <div class="cal-dow">Tu</div>
+          <div class="cal-dow">We</div>
+          <div class="cal-dow">Th</div>
+          <div class="cal-dow">Fr</div>
+          <div class="cal-dow">Sa</div>
+        </div>
+        <div class="cal-days" id="calDays"></div>
+        <div class="cal-legend">
+          <div class="legend-item"><span class="legend-dot legend-dot--rsvp"></span> RSVP'd event</div>
+          <div class="legend-item"><span class="legend-dot legend-dot--today"></span> Today</div>
+        </div>
+      </div>
+
+      <!-- Category Breakdown -->
+      <div class="sidebar-card">
+        <div class="sidebar-card-title">Activity by category</div>
+        <div id="categoryChart" class="category-chart">
+          <div class="empty-message">Loading...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <button class="back-btn" onclick="window.location.href='/index.html'">← Back to Home</button>
+
+  <script src="js/userEvents.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="/js/background.js"></script>
+</body>
+</html>
