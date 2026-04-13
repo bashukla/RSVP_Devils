@@ -109,9 +109,11 @@ html, body {
       padding: 20px;
       margin-bottom: 20px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border-top: 5px solid #FFC627;
     }
     .feature h2 {
       margin-top: 0;
+      color: #8C1D40;
     }
     .feature p {
       margin: 10px 0 20px;

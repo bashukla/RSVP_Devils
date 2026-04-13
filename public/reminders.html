@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="/images/asu-2.svg">
     <link rel="stylesheet" href="css/reminders.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="css/DarkTheme.css">
     <script src="js/theme-toggle.js"></script>
@@ -16,13 +17,11 @@
 <body>
 
     <nav class="navbar">
-    <div class="hamburger" id="hamburger">&#9776;</div>
-    <div class="logo">RSVP Devils</div>
-    <div class="nav-right">
-      <button id="theme-toggle-btn">🌙 Dark Mode</button>
-      <div class="hamburger" onclick="toggleMenu()"></div>
-    </div> 
-
+    <div class="nav-left">
+      <div class="hamburger" id="hamburger">&#9776;</div>
+      <a href="/index.html" class="logo">RSVP Devils</a>
+    </div>
+    <div class="nav-right"></div>
     <div class="profile-btn" id="profileBtn">
       <i class="fas fa-user-circle"></i>
     </div>
@@ -63,16 +62,9 @@
             <h2>Reminder Settings</h2>
             <div class="setting-item">
                 <label>
-                    <input type="checkbox" id="emailReminders" checked>
-                    <span>Enable email reminders (24 hours before event)</span>
-                </label>
-            </div>
-            <div class="setting-item">
-                <label>
-                    <!-- Ghost Text Style applied via CSS -->
                     <input type="email" id="userEmail" placeholder="student@asu.edu" value="">
                 </label>
-                <p class="subtitle" style="margin-top:5px; font-size:12px;">Only .edu emails are accepted for notifications.</p>
+                <p class="subtitle" style="margin-top:5px; font-size:12px;">Only .edu emails are accepted for notifications. To enable/disable reminders, visit <a href="/userSettings.html" class="settings-link">User Settings</a>.</p>
             </div>
         </div>
 
@@ -137,7 +129,8 @@
     <button class="back-btn" onclick="goDashboard()">← Back to Home</button>
     <script src="js/reminders.js"></script>
     <script src="js/navbar.js"></script>
-  <script src="/js/background.js"></script>
+    <script src="/js/background.js"></script>
+    <button id="theme-toggle-btn" title="Toggle dark mode"><i class="fas fa-moon"></i></button>
 </body>
 </html>
 

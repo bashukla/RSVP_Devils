@@ -209,14 +209,14 @@
 
 /* Secondary button */
 :root.dark .btn-secondary {
-  background-color: transparent;
+  background-color: #444;
   color: #f4f4f4;
   border-color: #f4f4f4;
 }
 
 :root.dark .btn-secondary:hover {
-  background-color: #f4f4f4;
-  color: #1a1a1a;
+  background-color: #555;
+  color: white;
 }
 /* ===== LOGON PAGE DARK MODE OVERRIDES ===== */
 
@@ -353,6 +353,7 @@
 :root.dark #customPopup .popup-message {
   color: #ddd;
 }
+<<<<<<< Updated upstream
 /* ===== DASHBOARD / CHART BUILDER DARK MODE OVERRIDES ===== */
 
 /* Page background */
@@ -684,4 +685,142 @@
   border-color: #FFC627;
   color: #FFC627;
   background-color: #3a3a3a;
+}
+
+/* ── THEME TOGGLE BUTTON ── */
+#theme-toggle-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  background: #8C1D40;
+  border: 2px solid #FFC627;
+  color: #FFC627;
+  font-size: 20px;
+  cursor: pointer;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+
+#theme-toggle-btn:hover {
+  background: #FFC627;
+  color: #8C1D40;
+  transform: scale(1.1);
+}
+
+/* ── LOGO AS HOME LINK ── */
+a.logo {
+  text-decoration: none;
+  color: #8C1D40;
+  font-weight: 700;
+  font-size: 16px;
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: #FFC627;
+  padding: 5px 12px;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+a.logo:hover {
+  background: white;
+  color: #8C1D40;
+}
+
+/* ── OSWALD HEADER FONT ── */
+h1, h2, .card-title, .banner-text h1, .header-text h1, header h1 {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 600px) {
+  #theme-toggle-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    bottom: 16px;
+    right: 16px;
+  }
+}
+
+/* ── REMINDERS PAGE DARK MODE VISIBILITY FIXES ── */
+
+/* Event title in reminder cards */
+:root.dark .reminder-info h3 {
+  color: #FFC627;
+}
+
+/* Preview Email button */
+:root.dark .btn-preview {
+  color: #FFC627;
+  border-color: #FFC627;
+}
+
+:root.dark .btn-preview:hover {
+  background: #FFC627;
+  color: #1a1a1a;
+}
+
+/* Email preview header labels and divider */
+:root.dark .email-header strong {
+  color: #FFC627;
+}
+
+:root.dark .email-header {
+  border-bottom-color: #FFC627;
+}
+
+/* Email body heading */
+:root.dark .email-body h3 {
+  color: #FFC627;
+}
+
+/* Email details gold border */
+:root.dark .email-details {
+  border-left-color: #FFC627;
+}
+
+/* Reminder settings link */
+:root.dark .settings-card a,
+:root.dark .setting-item a {
+  color: #FFC627;
+}
+
+:root.dark .settings-link {
+  color: #FFC627 !important;
+}
+
+/* ── INDEX FEATURE CARDS DARK MODE ── */
+:root.dark .feature {
+  background-color: #2a2a2a;
+  border-top-color: #FFC627;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+:root.dark .feature h2 {
+  color: #FFC627;
+}
+
+:root.dark .feature p {
+  color: #ccc;
+}
+
+/* ── LOGO POSITION ── */
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+}
+
+a.logo { 
+  margin-left: 0;
+  line-height: 1;
 }

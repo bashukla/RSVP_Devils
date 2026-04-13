@@ -7,6 +7,14 @@ const messageEl = document.getElementById('message');
 const forgotPasswordLink = document.getElementById('forgot-password-link');
 const forgotPasswordForm = document.getElementById('forgot-password-form');
 
+// Show session expired message if redirected
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('reason') === 'expired') {
+    messageEl.textContent = 'Your session has expired. Please log in again.';
+    messageEl.style.color = '#FFC627';
+    messageEl.style.fontWeight = 'bold';
+}
+
 loginTab.addEventListener('click', () => {
     logonForm.classList.add('active-form');
     createAccountForm.classList.remove('active-form');

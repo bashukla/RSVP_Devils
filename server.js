@@ -704,7 +704,7 @@ app.post('/api/rsvp', authenticateToken, async (req, res) => {
         const rsvpHtml = `
             <div style="font-family:Arial,sans-serif; max-width:600px; margin:auto; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
                 <div style="background:#8C1D40; padding:25px; text-align:center;">
-                    <h1 style="color:#FFC627; margin:0; font-size:24px;">Sun Devil Central</h1>
+                    <h1 style="color:#FFC627; margin:0; font-size:24px;">Sun Devil RSVP</h1>
                     <p style="color:white; margin:5px 0 0 0; font-size:14px;">Arizona State University</p>
                 </div>
                 <div style="padding:30px;">
@@ -719,9 +719,13 @@ app.post('/api/rsvp', authenticateToken, async (req, res) => {
                     </div>
                     <p>A reminder email will be sent 24 hours before the event starts.</p>
                     <p>We look forward to seeing you there! <strong>Go Devils!</strong></p>
+                    <div style="text-align:center; margin-top:24px;">
+                        <a href="${process.env.APP_URL || 'http://localhost:3000'}/events.html" style="background:#8C1D40; color:white; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold; font-size:14px; margin-right:10px;">View Event</a>
+                        <a href="${process.env.APP_URL || 'http://localhost:3000'}/reminders.html" style="background:#FFC627; color:black; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold; font-size:14px;">Manage Reminders</a>
+                    </div>
                 </div>
                 <div style="background:#f5f5f5; padding:15px; text-align:center; font-size:12px; color:#999;">
-                    <p style="margin:0;">Arizona State University | Sun Devil Central</p>
+                    <p style="margin:0;">Arizona State University | Sun Devil RSVP</p>
                     <p style="margin:5px 0 0 0;">To manage your reminders, visit your account settings.</p>
                 </div>
             </div>
@@ -779,7 +783,7 @@ app.delete('/api/rsvp/:eventId', authenticateToken, async (req, res) => {
         const cancelHtml = `
             <div style="font-family:Arial,sans-serif; max-width:600px; margin:auto; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
                 <div style="background:#8C1D40; padding:25px; text-align:center;">
-                    <h1 style="color:#FFC627; margin:0; font-size:24px;">Sun Devil Central</h1>
+                    <h1 style="color:#FFC627; margin:0; font-size:24px;">Sun Devil RSVP</h1>
                     <p style="color:white; margin:5px 0 0 0; font-size:14px;">Arizona State University</p>
                 </div>
                 <div style="padding:30px;">
@@ -793,7 +797,7 @@ app.delete('/api/rsvp/:eventId', authenticateToken, async (req, res) => {
                     <p>If this was a mistake, you can re-RSVP anytime from the events page.</p>
                 </div>
                 <div style="background:#f5f5f5; padding:15px; text-align:center; font-size:12px; color:#999;">
-                    <p style="margin:0;">Arizona State University | Sun Devil Central</p>
+                    <p style="margin:0;">Arizona State University | Sun Devil RSVP</p>
                     <p style="margin:5px 0 0 0;">To manage your reminders, visit your account settings.</p>
                 </div>
             </div>
@@ -851,15 +855,30 @@ app.get('/api/reminders/test-send', authenticateToken, async (req, res) => {
 
         for (const row of rows) {
             const html = `
-                <h3>Event Reminder</h3>
-                <p>Hi Sun Devil,</p>
-                <p>This is a friendly reminder for the following event:</p>
-                <div style="background:#f9f9f9; padding:15px; border-left:4px solid #FFC627;">
-                    <p><strong>Event:</strong> ${row.title}</p>
-                    <p><strong>Time:</strong> ${row.event_datetime}</p>
-                    <p><strong>Location:</strong> ${row.location}</p>
+                <div style="font-family:Arial,sans-serif; max-width:600px; margin:auto; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
+                    <div style="background:#8C1D40; padding:25px; text-align:center;">
+                        <h1 style="color:#FFC627; margin:0; font-size:24px;">Sun Devil RSVP</h1>
+                        <p style="color:white; margin:5px 0 0 0; font-size:14px;">Arizona State University</p>
+                    </div>
+                    <div style="padding:30px;">
+                        <h2 style="color:#8C1D40; margin-top:0;">Event Reminder</h2>
+                        <p>Hi Sun Devil,</p>
+                        <p>This is a friendly reminder for the following event:</p>
+                        <div style="background:#f9f9f9; padding:15px; border-left:4px solid #FFC627; border-radius:4px; margin:20px 0;">
+                            <p style="margin:5px 0;"><strong>Event:</strong> ${row.title}</p>
+                            <p style="margin:5px 0;"><strong>Time:</strong> ${row.event_datetime}</p>
+                            <p style="margin:5px 0;"><strong>Location:</strong> ${row.location}</p>
+                        </div>
+                        <p>We look forward to seeing you there! <strong>Go Devils!</strong></p>
+                        <div style="text-align:center; margin-top:24px;">
+                            <a href="${process.env.APP_URL || 'http://localhost:3000'}/events.html" style="background:#8C1D40; color:white; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold; font-size:14px; margin-right:10px;">View Event</a>
+                            <a href="${process.env.APP_URL || 'http://localhost:3000'}/reminders.html" style="background:#FFC627; color:black; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold; font-size:14px;">Manage Reminders</a>
+                        </div>
+                    </div>
+                    <div style="background:#f5f5f5; padding:15px; text-align:center; font-size:12px; color:#999;">
+                        <p style="margin:0;">Arizona State University | Sun Devil RSVP</p>
+                    </div>
                 </div>
-                <p>We look forward to seeing you there!</p>
             `;
             await sendEmail(row.email, `Reminder: ${row.title}`, html);
             await connection.execute('UPDATE user_reminders SET email_sent = 1 WHERE reminder_id = ?', [row.reminder_id]);
@@ -934,7 +953,7 @@ app.post('/api/reminders/toggle', authenticateToken, async (req, res) => {
         const html = `
             <div style="font-family:Arial,sans-serif; max-width:600px; margin:auto; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
                 <div style="background:#8C1D40; padding:25px; text-align:center;">
-                    <h1 style="color:#FFC627; margin:0; font-size:24px;">Sun Devil Central</h1>
+                    <h1 style="color:#FFC627; margin:0; font-size:24px;">Sun Devil RSVP</h1>
                     <p style="color:white; margin:5px 0 0 0; font-size:14px;">Arizona State University</p>
                 </div>
                 <div style="padding:30px;">
@@ -948,7 +967,7 @@ app.post('/api/reminders/toggle', authenticateToken, async (req, res) => {
                     <p>${is_active ? 'You will receive a reminder email 24 hours before this event.' : 'You will no longer receive a reminder for this event.'}</p>
                 </div>
                 <div style="background:#f5f5f5; padding:15px; text-align:center; font-size:12px; color:#999;">
-                    <p style="margin:0;">Arizona State University | Sun Devil Central</p>
+                    <p style="margin:0;">Arizona State University | Sun Devil RSVP</p>
                     <p style="margin:5px 0 0 0;">To manage your reminders, visit your account settings.</p>
                 </div>
             </div>
@@ -1055,15 +1074,30 @@ cron.schedule('0 * * * *', async () => {
 
         for (const row of rows) {
             const html = `
-                <h3>Event Reminder</h3>
-                <p>Hi Sun Devil,</p>
-                <p>This is a friendly reminder for the following event:</p>
-                <div style="background:#f9f9f9; padding:15px; border-left:4px solid #FFC627;">
-                    <p><strong>Event:</strong> ${row.title}</p>
-                    <p><strong>Time:</strong> ${row.event_datetime}</p>
-                    <p><strong>Location:</strong> ${row.location}</p>
+                <div style="font-family:Arial,sans-serif; max-width:600px; margin:auto; border:1px solid #ddd; border-radius:8px; overflow:hidden;">
+                    <div style="background:#8C1D40; padding:25px; text-align:center;">
+                        <h1 style="color:#FFC627; margin:0; font-size:24px;">Sun Devil RSVP</h1>
+                        <p style="color:white; margin:5px 0 0 0; font-size:14px;">Arizona State University</p>
+                    </div>
+                    <div style="padding:30px;">
+                        <h2 style="color:#8C1D40; margin-top:0;">Event Reminder</h2>
+                        <p>Hi Sun Devil,</p>
+                        <p>This is a friendly reminder for the following event:</p>
+                        <div style="background:#f9f9f9; padding:15px; border-left:4px solid #FFC627; border-radius:4px; margin:20px 0;">
+                            <p style="margin:5px 0;"><strong>Event:</strong> ${row.title}</p>
+                            <p style="margin:5px 0;"><strong>Time:</strong> ${row.event_datetime}</p>
+                            <p style="margin:5px 0;"><strong>Location:</strong> ${row.location}</p>
+                        </div>
+                        <p>We look forward to seeing you there! <strong>Go Devils!</strong></p>
+                        <div style="text-align:center; margin-top:24px;">
+                            <a href="${process.env.APP_URL || 'http://localhost:3000'}/events.html" style="background:#8C1D40; color:white; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold; font-size:14px; margin-right:10px;">View Event</a>
+                            <a href="${process.env.APP_URL || 'http://localhost:3000'}/reminders.html" style="background:#FFC627; color:black; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold; font-size:14px;">Manage Reminders</a>
+                        </div>
+                    </div>
+                    <div style="background:#f5f5f5; padding:15px; text-align:center; font-size:12px; color:#999;">
+                        <p style="margin:0;">Arizona State University | Sun Devil RSVP</p>
+                    </div>
                 </div>
-                <p>We look forward to seeing you there!</p>
             `;
             await sendEmail(row.email, `Reminder: ${row.title}`, html);
             await connection.execute('UPDATE user_reminders SET email_sent = 1 WHERE reminder_id = ?', [row.reminder_id]);
