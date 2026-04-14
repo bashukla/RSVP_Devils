@@ -11,7 +11,7 @@ let allEvents     = [];
 let eventView     = 'upcoming';
 let calYear, calMonth;
 
-// Custom Popup 
+// Custom Popup (mirrors events.js exactly)
 const popup = document.createElement('div');
 popup.id = 'customPopup';
 popup.className = 'hidden';
@@ -161,13 +161,42 @@ pastBtn.addEventListener('click', () => {
   updateEventList();
 });
 
+// Search and sort listeners — attached after DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('userSearchInput');
+  const sortFilter  = document.getElementById('userSortFilter');
+  if (searchInput) searchInput.addEventListener('input', updateEventList);
+  if (sortFilter)  sortFilter.addEventListener('change', updateEventList);
+}, { once: true });
+
 function updateEventList() {
-  const now = new Date();
-  const filtered = allUserEvents.filter(e =>
+  const now         = new Date();
+  const searchInput = document.getElementById('userSearchInput');
+  const sortFilter  = document.getElementById('userSortFilter');
+  const searchTerm  = searchInput ? searchInput.value.trim().toLowerCase() : '';
+  const sortValue   = sortFilter  ? sortFilter.value : 'date-asc';
+
+  let filtered = allUserEvents.filter(e =>
     eventView === 'upcoming'
       ? new Date(e.event_datetime) >= now
       : new Date(e.event_datetime) < now
   );
+
+  if (searchTerm) {
+    filtered = filtered.filter(e =>
+      e.description.toLowerCase().includes(searchTerm) ||
+      e.location.toLowerCase().includes(searchTerm) ||
+      (e.tags && e.tags.toLowerCase().includes(searchTerm)) ||
+      (e.type && e.type.toLowerCase().includes(searchTerm))
+    );
+  }
+
+  if (sortValue === 'date-asc') {
+    filtered.sort((a, b) => new Date(a.event_datetime) - new Date(b.event_datetime));
+  } else if (sortValue === 'date-desc') {
+    filtered.sort((a, b) => new Date(b.event_datetime) - new Date(a.event_datetime));
+  }
+
   renderEventList(filtered);
 }
 
@@ -309,19 +338,21 @@ function initCalendar() {
 }
 
 function updateCalendarDots(events) {
-  window._rsvpDates = new Set(
-    events.map(e => {
-      const d = new Date(e.event_datetime);
-      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    })
-  );
+  // Build a map of "YYYY-M-D" -> [event, ...] for fast lookup
+  window._rsvpEventMap = {};
+  events.forEach(e => {
+    const d   = new Date(e.event_datetime);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    if (!window._rsvpEventMap[key]) window._rsvpEventMap[key] = [];
+    window._rsvpEventMap[key].push(e);
+  });
   renderCalendar();
 }
 
 function renderCalendar() {
-  const label   = document.getElementById('calMonthLabel');
-  const daysEl  = document.getElementById('calDays');
-  const rsvpSet = window._rsvpDates || new Set();
+  const label    = document.getElementById('calMonthLabel');
+  const daysEl   = document.getElementById('calDays');
+  const eventMap = window._rsvpEventMap || {};
 
   const monthNames = ['January','February','March','April','May','June',
                       'July','August','September','October','November','December'];
@@ -332,24 +363,93 @@ function renderCalendar() {
   const daysInMon = new Date(calYear, calMonth + 1, 0).getDate();
   const prevDays  = new Date(calYear, calMonth, 0).getDate();
 
-  let html = '';
+  // Clear and rebuild day cells as real elements so we can attach listeners
+  daysEl.innerHTML = '';
 
+  const addCell = (text, classes) => {
+    const el = document.createElement('div');
+    el.className = classes;
+    el.textContent = text;
+    daysEl.appendChild(el);
+    return el;
+  };
+
+  // Prev month overflow
   for (let i = firstDay - 1; i >= 0; i--) {
-    html += `<div class="cal-day other-month">${prevDays - i}</div>`;
+    addCell(prevDays - i, 'cal-day other-month');
   }
 
+  // Current month
   for (let d = 1; d <= daysInMon; d++) {
     const isToday  = d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
-    const hasEvent = rsvpSet.has(`${calYear}-${calMonth}-${d}`);
-    const classes  = ['cal-day', isToday ? 'today' : '', hasEvent ? 'has-event' : ''].filter(Boolean).join(' ');
-    html += `<div class="${classes}">${d}</div>`;
+    const key      = `${calYear}-${calMonth}-${d}`;
+    const events   = eventMap[key] || [];
+    const hasEvent = events.length > 0;
+    const cellDate = new Date(calYear, calMonth, d, 23, 59, 59);
+    const allPast  = hasEvent && cellDate < today;
+    const dotClass = hasEvent ? (allPast ? 'is-past' : 'is-future') : '';
+    const classes  = ['cal-day', isToday ? 'today' : '', hasEvent ? 'has-event' : '', dotClass].filter(Boolean).join(' ');
+    const cell     = addCell(d, classes);
+
+    if (hasEvent) {
+      cell.addEventListener('mouseenter', (e) => showCalTooltip(e.currentTarget, events));
+      cell.addEventListener('mouseleave', hideCalTooltip);
+    }
   }
 
+  // Next month overflow
   const totalCells = firstDay + daysInMon;
   const remainder  = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
   for (let d = 1; d <= remainder; d++) {
-    html += `<div class="cal-day other-month">${d}</div>`;
+    addCell(d, 'cal-day other-month');
   }
+}
 
-  daysEl.innerHTML = html;
+// Calendar tooltip
+const calTooltip = document.createElement('div');
+calTooltip.id = 'calTooltip';
+calTooltip.className = 'cal-tooltip hidden';
+document.body.appendChild(calTooltip);
+
+function showCalTooltip(cell, events) {
+  const now = new Date();
+
+  calTooltip.innerHTML = `
+    <div class="cal-tooltip-list">
+      ${events.map(e => {
+        const dateObj  = new Date(e.event_datetime);
+        const timeStr  = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        const isPast   = dateObj < now;
+        const statusCls = isPast ? 'cal-tt-status past' : 'cal-tt-status upcoming';
+        const statusTxt = isPast ? 'Attended' : "RSVP'd";
+        return `
+          <div class="cal-tooltip-event">
+            <div class="cal-tt-title">${e.description}</div>
+            <div class="cal-tt-meta">${timeStr} &middot; ${e.location}</div>
+            <div class="cal-tt-row">
+              <span class="cal-tt-type">${e.type}</span>
+              <span class="${statusCls}">${statusTxt}</span>
+            </div>
+          </div>
+        `;
+      }).join('<div class="cal-tt-divider"></div>')}
+    </div>
+  `;
+
+  calTooltip.classList.remove('hidden');
+
+  // Position tooltip relative to the cell
+  const rect      = cell.getBoundingClientRect();
+  const tipWidth  = 220;
+  const scrollY   = window.scrollY;
+  let left = rect.left + rect.width / 2 - tipWidth / 2;
+  // Keep within viewport
+  left = Math.max(8, Math.min(left, window.innerWidth - tipWidth - 8));
+  calTooltip.style.left  = `${left}px`;
+  calTooltip.style.top   = `${rect.bottom + scrollY + 6}px`;
+  calTooltip.style.width = `${tipWidth}px`;
+}
+
+function hideCalTooltip() {
+  calTooltip.classList.add('hidden');
 }

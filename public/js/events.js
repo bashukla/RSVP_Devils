@@ -240,7 +240,7 @@ function renderEvents(events) {
         </div>
 
         <div class="card-body">
-          <img src="${event.image ? `/images/uploads/${event.image}` : '/images/ASU Logos/Arizona-State-Sun-Devils-logo.png'}" class="event-image" onerror="this.src='/images/ASU Logos/Arizona-State-Sun-Devils-logo.png'">
+          <img src="${event.image ? `/uploads/${event.image}` : '/images/ASU Logos/Arizona-State-Sun-Devils-logo.png'}" class="event-image" onerror="this.src='/images/ASU Logos/Arizona-State-Sun-Devils-logo.png'">
             <h3 class="event-title">${event.description}</h3>
             <div class="event-details"><strong>Date:</strong> ${dateStr}</div>
             <div class="event-details"><strong>Time:</strong> ${timeStr}</div>
