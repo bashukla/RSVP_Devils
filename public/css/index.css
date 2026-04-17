@@ -493,3 +493,80 @@ body {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+/* Filter wrapper */
+.carousel-filter-wrapper {
+  width: 90%;
+  max-width: 900px;
+  margin: 20px auto 0;
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Toggle button */
+.filter-toggle-btn {
+  background-color: #8C1D40;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.filter-toggle-btn:hover {
+  background-color: #6e1632;
+}
+
+/* Dropdown panel */
+.filter-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  padding: 14px 18px;
+  z-index: 500;
+  min-width: 200px;
+  border-top: 3px solid #8C1D40;
+}
+
+.filter-dropdown.hidden {
+  display: none;
+}
+
+.filter-label {
+  font-size: 13px;
+  font-weight: bold;
+  color: #8C1D40;
+  margin: 0 0 10px;
+}
+
+/* Checkbox rows */
+.filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #333;
+}
+
+.filter-option input[type=checkbox] {
+  accent-color: #8C1D40;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}

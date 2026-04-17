@@ -17,6 +17,75 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // load highlighted events
+// ── Filter dropdown ──────────────────────────────────────────
+
+const STORAGE_KEY = 'carouselEventTypePrefs';
+
+// Returns Set of event types the user wants to see.
+// If nothing saved yet, returns null (meaning "show all").
+function getSavedPrefs() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? new Set(JSON.parse(raw)) : null;
+}
+
+function savePrefs(typesSet) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...typesSet]));
+}
+
+// Build the checkbox list from the distinct event types in all events
+function buildFilterDropdown(allEventTypes, savedPrefs) {
+    const container = document.getElementById('filterOptions');
+    if (!container) return;
+    container.innerHTML = '';
+
+    allEventTypes.forEach(type => {
+        // If no prefs saved yet, default everything to checked
+        const isChecked = savedPrefs ? savedPrefs.has(type) : true;
+
+        const label = document.createElement('label');
+        label.className = 'filter-option';
+        label.innerHTML = `
+            <input type="checkbox" value="${type}" ${isChecked ? 'checked' : ''}>
+            ${type}
+        `;
+
+        label.querySelector('input').addEventListener('change', () => {
+            // Collect all currently checked types and save
+            const allCheckboxes = container.querySelectorAll('input[type=checkbox]');
+            const selected = new Set(
+                [...allCheckboxes].filter(cb => cb.checked).map(cb => cb.value)
+            );
+            savePrefs(selected);
+            // Reload the carousel with new prefs
+            loadHighlightedEvents();
+        });
+
+        container.appendChild(label);
+    });
+}
+
+// Toggle dropdown visibility
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('filterToggleBtn');
+    const dropdown = document.getElementById('filterDropdown');
+
+    if (btn && dropdown) {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', () => {
+            dropdown.classList.add('hidden');
+        });
+
+        dropdown.addEventListener('click', e => e.stopPropagation());
+    }
+});
+
+// ── Updated loadHighlightedEvents ────────────────────────────
+
 async function loadHighlightedEvents() {
     try {
         const track = document.getElementById('highlightCarousel');
@@ -29,20 +98,34 @@ async function loadHighlightedEvents() {
         if (!resp.ok) throw new Error('failed to fetch events');
 
         const events = await resp.json();
-
         const now = new Date();
 
         const upcoming = events
             .filter(e => new Date(e.event_datetime) >= now)
-            .sort((a, b) => new Date(a.event_datetime) - new Date(b.event_datetime))
-            .slice(0, 5);
+            .sort((a, b) => new Date(a.event_datetime) - new Date(b.event_datetime));
 
-        if (upcoming.length === 0) {
+        const allTypes = [...new Set(upcoming.map(e => e.type).filter(Boolean))];
+
+        const savedPrefs = getSavedPrefs();
+        buildFilterDropdown(allTypes, savedPrefs);
+
+        let toShow = upcoming;
+        if (savedPrefs && savedPrefs.size > 0) {
+            toShow = upcoming.filter(e => savedPrefs.has(e.type)); // ← fixed
+        }
+
+        if (toShow.length === 0) {
+            toShow = upcoming;
+        }
+
+        const final = toShow.slice(0, 5);
+
+        if (final.length === 0) {
             track.innerHTML = "<p>No upcoming events</p>";
             return;
         }
 
-        renderCarousel(upcoming);
+        renderCarousel(final);
         setupCarousel();
 
     } catch (err) {
