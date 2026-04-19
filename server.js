@@ -221,7 +221,7 @@ app.post('/api/create-account', async (req, res) => {
     }
 });
 
-// Route: Login 
+// Route: Login
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -237,7 +237,7 @@ app.post('/api/login', async (req, res) => {
             [email]
         );
 
-        await connection.end();  // Close connection
+        await connection.end();
 
         if (rows.length === 0) {
             return res.status(401).json({ message: 'Invalid email or password.' });
@@ -251,7 +251,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         const token = jwt.sign(
-            { email: user.email },
+            { email: user.email, role: user.role }, // ← add role here
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
