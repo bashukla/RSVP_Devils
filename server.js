@@ -1573,3 +1573,42 @@ app.get('/api/admin/stats/users', async (req, res) => {
         if (connection) await connection.end();
     }
 });
+
+// Route: Get all users (admin)
+app.get('/api/admin/users', authenticateToken, async (req, res) => {
+    let connection;
+    try {
+        connection = await createConnection();
+        const [rows] = await connection.execute(
+            'SELECT user_id, email, role, created_at FROM user ORDER BY created_at DESC'
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching users.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+// Route: Update user role (admin)
+app.patch('/api/admin/users/:id/role', authenticateToken, async (req, res) => {
+    const { role } = req.body;
+    if (!['admin', 'user'].includes(role)) {
+        return res.status(400).json({ message: 'Invalid role.' });
+    }
+    let connection;
+    try {
+        connection = await createConnection();
+        await connection.execute(
+            'UPDATE user SET role = ? WHERE user_id = ?',
+            [role, req.params.id]
+        );
+        res.json({ message: `User role updated to ${role}.` });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error updating role.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});

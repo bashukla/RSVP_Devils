@@ -192,6 +192,36 @@
         </div>
  
       </div><!-- end stat-categories -->
+      <!-- USER MANAGEMENT -->
+<div class="section-title">
+    <i class="fas fa-users-gear"></i> User Management
+</div>
+<div class="panel" style="margin-bottom: 28px;">
+    <div class="panel-header"><i class="fas fa-users"></i> All Users</div>
+    <div class="panel-body">
+        <div class="user-search-row">
+            <input type="text" id="userSearchInput" placeholder="Search by email..." oninput="filterUserTable()">
+            <button class="btn-maroon" onclick="loadUserTable()">
+                <i class="fas fa-rotate-right"></i> Refresh
+            </button>
+        </div>
+        <div class="user-table-wrapper">
+            <table class="user-table" id="userTable">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Joined</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <tr><td colspan="4" class="table-empty">Click Refresh to load users</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
     </div><!-- end top-row -->
 
 

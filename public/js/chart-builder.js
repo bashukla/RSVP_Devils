@@ -763,3 +763,92 @@ function filterLanes(btn) {
     lane.style.display = (filter === 'all' || lane.dataset.lane === filter) ? '' : 'none';
   });
 }
+
+// ─── USER MANAGEMENT ─────────────────────────────────────────────────────────
+let allUsers = [];
+
+async function loadUserTable() {
+    const tbody = document.getElementById('userTableBody');
+    tbody.innerHTML = '<tr><td colspan="4" class="table-empty"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
+
+    try {
+        const token = localStorage.getItem('jwtToken');
+        const res = await fetch(`${API}/admin/users`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        allUsers = await res.json();
+        renderUserTable(allUsers);
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="table-empty">Error loading users: ${err.message}</td></tr>`;
+    }
+}
+
+function filterUserTable() {
+    const query = document.getElementById('userSearchInput').value.toLowerCase();
+    const filtered = allUsers.filter(u => u.email.toLowerCase().includes(query));
+    renderUserTable(filtered);
+}
+
+function renderUserTable(users) {
+    const tbody = document.getElementById('userTableBody');
+
+    if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="table-empty">No users found</td></tr>';
+        return;
+    }
+
+    // Get the current admin's email so we can't demote ourselves
+    const token = localStorage.getItem('jwtToken');
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentEmail = payload.email;
+
+    tbody.innerHTML = users.map(user => {
+        const isAdmin = user.role === 'admin';
+        const isSelf  = user.email === currentEmail;
+
+        return `
+        <tr>
+            <td>${user.email} ${isSelf ? '<span class="you-badge">you</span>' : ''}</td>
+            <td>
+                <span class="role-badge ${isAdmin ? 'role-admin' : 'role-user'}">
+                    ${isAdmin ? '<i class="fas fa-shield-halved"></i> Admin' : '<i class="fas fa-user"></i> User'}
+                </span>
+            </td>
+            <td>${new Date(user.created_at).toLocaleDateString()}</td>
+            <td>
+                ${isSelf ? '<span style="color:#999;font-size:13px;">—</span>' : `
+                <button class="card-action-btn ${isAdmin ? 'danger' : ''}" onclick="toggleUserRole(${user.user_id}, '${user.role}', '${user.email}')">
+                    ${isAdmin
+                        ? '<i class="fas fa-user-minus"></i> Remove Admin'
+                        : '<i class="fas fa-user-shield"></i> Make Admin'}
+                </button>`}
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+async function toggleUserRole(userId, currentRole, email) {
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    const action  = newRole === 'admin' ? `make ${email} an admin` : `remove admin from ${email}`;
+
+    const confirmed = await showConfirm(`Are you sure you want to ${action}?`);
+    if (!confirmed) return;
+
+    try {
+        const token = localStorage.getItem('jwtToken');
+        const res = await fetch(`${API}/admin/users/${userId}/role`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ role: newRole })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        showPopup('success', `${email} is now ${newRole === 'admin' ? 'an admin' : 'a regular user'}.`);
+        await loadUserTable();
+    } catch (err) {
+        showPopup('error', `Failed to update role: ${err.message}`);
+    }
+}
