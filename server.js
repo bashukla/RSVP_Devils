@@ -42,6 +42,35 @@ app.get(['/', '/logon.html'], (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'logon.html'));
 });
 
+async function requireEventOwner(req, res, next) {
+    const connection = await createConnection();
+    const eventId = req.params.id;
+
+    const [userRows] = await connection.execute(
+        'SELECT user_id FROM user WHERE email = ?',
+        [req.user.email]
+    );
+
+    const userId = userRows[0]?.user_id;
+
+    const [eventRows] = await connection.execute(
+        'SELECT created_by FROM events WHERE event_id = ?',
+        [eventId]
+    );
+
+    await connection.end();
+
+    if (eventRows.length === 0) {
+        return res.status(404).json({ message: 'Event not found.' });
+    }
+
+    if (eventRows[0].created_by !== userId) {
+        return res.status(403).json({ message: 'Not authorized to modify this event.' });
+    }
+
+    next();
+}
+
 //////////////////////////////////////
 //ROUTES TO SERVE HTML FILES
 //////////////////////////////////////
@@ -183,6 +212,28 @@ async function sendEmail(to, subject, html) {
         console.error('Error sending email:', error);
     }
 }
+async function verifyEventOwner(connection, eventId, userEmail) {
+    const [userRows] = await connection.execute(
+        'SELECT user_id FROM user WHERE email = ?',
+        [userEmail]
+    );
+
+    if (userRows.length === 0) return null;
+
+    const userId = userRows[0].user_id;
+
+    const [eventRows] = await connection.execute(
+        'SELECT created_by FROM events WHERE event_id = ?',
+        [eventId]
+    );
+
+    if (eventRows.length === 0) return { error: 'not_found' };
+
+    const isOwner = eventRows[0].created_by === userId;
+
+    return { userId, isOwner };
+}
+
 /////////////////////////////////////////////////
 //END HELPER FUNCTIONS AND AUTHENTICATION MIDDLEWARE
 /////////////////////////////////////////////////
@@ -505,11 +556,11 @@ app.post(
 );
 
 // Route: Update Event 
-app.put(
-  '/api/events/:id',
-  authenticateToken,
-  upload.single('image'),
-  async (req, res) => {
+app.put('/api/events/:id',
+    authenticateToken,
+    requireEventOwner,
+    upload.single('image'),
+    async (req, res) => {
 
     const { type, description, event_datetime, location, tags } = req.body;
     const eventId = req.params.id;
@@ -520,7 +571,22 @@ app.put(
 
     try {
       const connection = await createConnection();
+      const ownership = await verifyEventOwner(connection, eventId, req.user.email);
 
+        if (!ownership) {
+            await connection.end();
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        if (ownership.error === 'not_found') {
+            await connection.end();
+            return res.status(404).json({ message: 'Event not found.' });
+        }
+
+        if (!ownership.isOwner) {
+            await connection.end();
+            return res.status(403).json({ message: 'You are not the owner of this event.' });
+        }
       // Get current image filename
       const [existingRows] = await connection.execute(
         'SELECT image FROM events WHERE event_id = ?',
@@ -583,12 +649,30 @@ app.put(
 // Route: Delete Event
 
 const { connect } = require('http2');
-app.delete('/api/events/:id', authenticateToken, async (req, res) => {
+app.delete('/api/events/:id',
+    authenticateToken,
+    requireEventOwner,
+    async (req, res) => {
     const eventId = req.params.id;
 
     try {
         const connection = await createConnection();
+        const ownership = await verifyEventOwner(connection, eventId, req.user.email);
 
+        if (!ownership) {
+            await connection.end();
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        if (ownership.error === 'not_found') {
+            await connection.end();
+            return res.status(404).json({ message: 'Event not found.' });
+        }
+
+        if (!ownership.isOwner) {
+            await connection.end();
+            return res.status(403).json({ message: 'You are not the owner of this event.' });
+        }
         // 1. Get image filename BEFORE deleting event
         const [rows] = await connection.execute(
             'SELECT image FROM events WHERE event_id = ?',
@@ -644,6 +728,18 @@ app.delete('/api/events/:id', authenticateToken, async (req, res) => {
         console.error('Delete event error:', error);
         res.status(500).json({ message: 'Error deleting event.' });
     }
+});
+app.get('/api/me', authenticateToken, async (req, res) => {
+    const connection = await createConnection();
+
+    const [rows] = await connection.execute(
+        'SELECT user_id FROM user WHERE email = ?',
+        [req.user.email]
+    );
+
+    await connection.end();
+
+    res.json(rows[0]);
 });
 
 // Route: RSVP to an Event
@@ -1317,47 +1413,6 @@ app.post('/api/chart-data', async (req, res) => {
     }
 });
 
-
-//Stat Cards
-app.get('/api/admin/stats/users', async (req, res) => {
-    let connection;
-    try {
-        connection = await createConnection();
- 
-        let total = 0, active = 0, withRsvp = 0, new30d = 0;
-         try {
-            const [[row]] = await connection.execute(
-                'SELECT COUNT(*) AS cnt FROM user WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)'
-            );
-            new30d = row.cnt;
-        } catch (e) { console.error('stats new30d:', e.message); }
- 
-        try {
-            const [[row]] = await connection.execute('SELECT COUNT(*) AS cnt FROM user');
-            total = row.cnt;
-        } catch (e) { console.error('stats total:', e.message); }
- 
-        try {
-            const [[row]] = await connection.execute('SELECT COUNT(DISTINCT user_id) AS cnt FROM registration');
-            active = row.cnt;
-        } catch (e) { console.error('stats active:', e.message); }
- 
-        try {
-            const [[row]] = await connection.execute('SELECT COUNT(DISTINCT user_id) AS cnt FROM user_reminders WHERE is_active = 1');
-            withRsvp = row.cnt;
-        } catch (e) { console.error('stats withRsvp:', e.message); }
- 
-        await connection.end();
-        res.json({ total, active, withRsvp, new30d });
- 
-    } catch (error) {
-        console.error('Error fetching user stats:', error);
-        res.status(500).json({ message: 'Error fetching user stats.' });
-    } finally {
-        if (connection) await connection.end();
-    }
-});
-
 //Get todays RSVP count
 app.get('/api/admin/stats/rsvp-today', async (req, res) => {
     let connection;
@@ -1576,6 +1631,9 @@ app.get('/api/admin/stats/users', async (req, res) => {
 
 // Route: Get all users (admin)
 app.get('/api/admin/users', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required.' });
+    }
     let connection;
     try {
         connection = await createConnection();
@@ -1593,6 +1651,9 @@ app.get('/api/admin/users', authenticateToken, async (req, res) => {
 
 // Route: Update user role (admin)
 app.patch('/api/admin/users/:id/role', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required.' });
+    }
     const { role } = req.body;
     if (!['admin', 'user'].includes(role)) {
         return res.status(400).json({ message: 'Invalid role.' });

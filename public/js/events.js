@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem("jwtToken");
     loadEvents(token);
@@ -14,6 +15,7 @@ const newEventBtn = document.getElementById('newEventBtn');
 let eventsData = [];
 let userRSVPs = [];
 let selectedEventId = null;
+let currentUserId = null;
 
 // Custom Popup
 const popup = document.createElement('div');
@@ -176,6 +178,19 @@ async function loadEvents(token) {
             fetch('/api/rsvp-count')
         ]);
 
+        currentUserId = null;
+
+        if (token) {
+            const meResp = await fetch('/api/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (meResp.ok) {
+                const me = await meResp.json();
+                currentUserId = me.user_id;
+            }
+        }
+
         if (!eventsResp.ok) throw new Error('Failed to load events');
         if (!rsvpResp.ok) throw new Error('Failed to load RSVP counts');
 
@@ -184,9 +199,11 @@ async function loadEvents(token) {
 
         eventsData = events.map(event => {
             const rsvp = rsvpData.find(r => Number(r.event_id) === Number(event.event_id));
+        
             return {
                 ...event,
-                rsvp_count: rsvp ? rsvp.rsvp_count : 0
+                rsvp_count: rsvp ? rsvp.rsvp_count : 0,
+                canEdit: currentUserId && event.created_by === currentUserId
             };
         });
 
@@ -218,6 +235,7 @@ function renderEvents(events) {
     }
 
     const token = localStorage.getItem("jwtToken");
+    const currentUserId = eventsData.length > 0 ? eventsData[0].canEditUserId : null;
 
     events.forEach(event => {
         const card = document.createElement('div');
@@ -234,8 +252,10 @@ function renderEvents(events) {
         <div class="card-header">
             <span class="card-category">${event.type}</span>
             <div class="card-icons">
-            <span class="edit-icon" title="Edit Event" data-id="${event.event_id}">&#9998;</span>
-            <span class="delete-icon" title="Delete Event" data-id="${event.event_id}">&#128465;</span>
+            ${event.canEdit ? `
+                <span class="edit-icon" title="Edit Event" data-id="${event.event_id}">&#9998;</span>
+                <span class="delete-icon" title="Delete Event" data-id="${event.event_id}">&#128465;</span>
+            ` : ''}
             </div>
         </div>
 
@@ -279,6 +299,11 @@ function attachCardListeners(token) {
         icon.addEventListener('click', () => {
             const eventId = icon.dataset.id;
             const eventData = eventsData.find(ev => ev.event_id == eventId);
+    
+            if (!eventData) {
+                return showPopup('error', 'Event not found');
+            }
+    
             openModalForEdit(eventData);
         });
     });
