@@ -261,6 +261,9 @@ function renderEvents(events) {
                     : (isRsvped ? 'Cancel RSVP' : 'RSVP Now')
                 }
             </button>
+            <button class="copy-btn" data-id="${event.event_id}" title="Copy event details">
+                <i class="fas fa-share-nodes"></i> Share
+            </button>
         </div>
         `;
         eventListEl.appendChild(card);
@@ -352,7 +355,41 @@ function attachCardListeners(token) {
             }
         });
     });
-            // Image upload handler
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const eventId = Number(btn.dataset.id);
+            const event = eventsData.find(e => e.event_id === eventId);
+            if (!event) return;
+
+            const dateObj = new Date(event.event_datetime);
+            const dateStr = dateObj.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+            const timeStr = dateObj.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+
+            const shareText = `${event.description}\nDate: ${dateStr}\nTime: ${timeStr}\nLocation: ${event.location}${event.tags ? `\nTags: ${event.tags}` : ''}`;
+            const shareUrl = `${window.location.origin}/events.html`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: event.description,
+                        text: shareText,
+                        url: shareUrl
+                    });
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        showPopup('error', 'Could not share event.');
+                    }
+                }
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
+                    showPopup('success', 'Event details copied! Share with your friends.');
+                }).catch(() => {
+                    showPopup('error', 'Failed to copy event details.');
+                });
+            }
+        });
+    });
     document.querySelectorAll('.image-upload').forEach(input => {
         input.addEventListener('change', async () => {
             const file = input.files[0];

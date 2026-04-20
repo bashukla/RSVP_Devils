@@ -667,3 +667,24 @@ body {
   transition: color 0.2s;
 }
 .profile-btn:hover { color: white; }
+
+/* Copy button */
+.copy-btn {
+  background: transparent;
+  border: 2px solid #8C1D40;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  color: #8C1D40;
+  font-size: 13px;
+  font-weight: 600;
+  transition: color 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.copy-btn:hover {
+  background: #8C1D40;
+  color: white;
+}

@@ -493,80 +493,78 @@ body {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-/* Filter wrapper */
-.carousel-filter-wrapper {
-  width: 90%;
-  max-width: 900px;
-  margin: 20px auto 0;
-  position: relative;
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* Toggle button */
-.filter-toggle-btn {
-  background-color: #8C1D40;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: bold;
+/* ── CAROUSEL CATEGORY FILTERS ── */
+.carousel-filters {
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background 0.2s;
-}
-
-.filter-toggle-btn:hover {
-  background-color: #6e1632;
-}
-
-/* Dropdown panel */
-.filter-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-  padding: 14px 18px;
-  z-index: 500;
-  min-width: 200px;
-  border-top: 3px solid #8C1D40;
-}
-
-.filter-dropdown.hidden {
-  display: none;
+  flex-wrap: wrap;
+  padding: 0 0 12px 0;
 }
 
 .filter-label {
-  font-size: 13px;
-  font-weight: bold;
-  color: #8C1D40;
-  margin: 0 0 10px;
-}
-
-/* Checkbox rows */
-.filter-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.filter-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  color: #333;
+  font-weight: 600;
   font-size: 14px;
+}
+
+.cat-filter {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 2px solid #8C1D40;
+  background: transparent;
+  color: #8C1D40;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.cat-filter:hover {
+  background: #8C1D40;
+  color: white;
+}
+
+.cat-filter.active {
+  background: #8C1D40;
+  color: white;
+}
+
+/* ── CAROUSEL CARD ENHANCEMENTS ── */
+.carousel-card-inner {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.carousel-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #8C1D40;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+
+.carousel-info {
+  padding: 12px 4px 4px;
+  text-align: center;
+}
+
+.carousel-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
   color: #333;
 }
 
-.filter-option input[type=checkbox] {
-  accent-color: #8C1D40;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
+.carousel-info p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #555;
 }

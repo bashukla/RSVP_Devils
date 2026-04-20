@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
     await loadHighlightedEvents();
+    setupFilters();
 });
 
 // load highlighted events
@@ -32,58 +33,6 @@ function savePrefs(typesSet) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...typesSet]));
 }
 
-// Build the checkbox list from the distinct event types in all events
-function buildFilterDropdown(allEventTypes, savedPrefs) {
-    const container = document.getElementById('filterOptions');
-    if (!container) return;
-    container.innerHTML = '';
-
-    allEventTypes.forEach(type => {
-        // If no prefs saved yet, default everything to checked
-        const isChecked = savedPrefs ? savedPrefs.has(type) : true;
-
-        const label = document.createElement('label');
-        label.className = 'filter-option';
-        label.innerHTML = `
-            <input type="checkbox" value="${type}" ${isChecked ? 'checked' : ''}>
-            ${type}
-        `;
-
-        label.querySelector('input').addEventListener('change', () => {
-            // Collect all currently checked types and save
-            const allCheckboxes = container.querySelectorAll('input[type=checkbox]');
-            const selected = new Set(
-                [...allCheckboxes].filter(cb => cb.checked).map(cb => cb.value)
-            );
-            savePrefs(selected);
-            // Reload the carousel with new prefs
-            loadHighlightedEvents();
-        });
-
-        container.appendChild(label);
-    });
-}
-
-// Toggle dropdown visibility
-document.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('filterToggleBtn');
-    const dropdown = document.getElementById('filterDropdown');
-
-    if (btn && dropdown) {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('hidden');
-        });
-
-        // Close when clicking outside
-        document.addEventListener('click', () => {
-            dropdown.classList.add('hidden');
-        });
-
-        dropdown.addEventListener('click', e => e.stopPropagation());
-    }
-});
-
 // ── Updated loadHighlightedEvents ────────────────────────────
 
 async function loadHighlightedEvents() {
@@ -98,39 +47,109 @@ async function loadHighlightedEvents() {
         if (!resp.ok) throw new Error('failed to fetch events');
 
         const events = await resp.json();
+        window._allCarouselEvents = events;
+
+        // Build dynamic filter buttons from actual event types
         const now = new Date();
-
-        const upcoming = events
-            .filter(e => new Date(e.event_datetime) >= now)
-            .sort((a, b) => new Date(a.event_datetime) - new Date(b.event_datetime));
-
+        const upcoming = events.filter(e => new Date(e.event_datetime) >= now);
         const allTypes = [...new Set(upcoming.map(e => e.type).filter(Boolean))];
+        buildFilterButtons(allTypes);
 
-        const savedPrefs = getSavedPrefs();
-        buildFilterDropdown(allTypes, savedPrefs);
-
-        let toShow = upcoming;
-        if (savedPrefs && savedPrefs.size > 0) {
-            toShow = upcoming.filter(e => savedPrefs.has(e.type)); // ← fixed
-        }
-
-        if (toShow.length === 0) {
-            toShow = upcoming;
-        }
-
-        const final = toShow.slice(0, 5);
-
-        if (final.length === 0) {
-            track.innerHTML = "<p>No upcoming events</p>";
-            return;
-        }
-
-        renderCarousel(final);
-        setupCarousel();
+        applyCarouselFilters();
 
     } catch (err) {
         console.error('carousel error:', err);
     }
+}
+
+// Build dynamic filter pill buttons from actual event types
+function buildFilterButtons(allTypes) {
+    const container = document.querySelector('.carousel-filters');
+    if (!container) return;
+
+    // Keep the "All" button, remove any dynamically added ones
+    container.querySelectorAll('.cat-filter:not([data-cat="All"])').forEach(b => b.remove());
+
+    allTypes.forEach(type => {
+        const btn = document.createElement('button');
+        btn.className = 'cat-filter';
+        btn.dataset.cat = type;
+        btn.textContent = type;
+        container.appendChild(btn);
+    });
+
+    setupFilters();
+}
+
+// Apply category filters and render
+function applyCarouselFilters() {
+    const events = window._allCarouselEvents || [];
+    const saved = getSavedPrefs();
+    const now = new Date();
+
+    let filtered = events.filter(e => new Date(e.event_datetime) >= now);
+
+    if (saved && saved.size > 0) {
+        const withFilter = filtered.filter(e => saved.has(e.type));
+        filtered = withFilter.length > 0 ? withFilter : filtered;
+    }
+
+    filtered = filtered
+        .sort((a, b) => new Date(a.event_datetime) - new Date(b.event_datetime))
+        .slice(0, 5);
+
+    const track = document.getElementById('highlightCarousel');
+    if (filtered.length === 0) {
+        track.innerHTML = "<p style='color:white;text-align:center;padding:20px;'>No events match your interests.</p>";
+        return;
+    }
+
+    renderCarousel(filtered);
+    setupCarousel();
+}
+
+// Setup filter toggle buttons
+function setupFilters() {
+    const saved = getSavedPrefs();
+    const buttons = document.querySelectorAll('.cat-filter');
+
+    buttons.forEach(btn => {
+        // Remove old listeners by cloning
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+    });
+
+    document.querySelectorAll('.cat-filter').forEach(btn => {
+        const cat = btn.dataset.cat;
+        const isActive = !saved || saved.size === 0 
+            ? cat === 'All' 
+            : saved.has(cat);
+        if (isActive) btn.classList.add('active');
+        else btn.classList.remove('active');
+
+        btn.addEventListener('click', () => {
+            if (cat === 'All') {
+                document.querySelectorAll('.cat-filter').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                localStorage.removeItem(STORAGE_KEY);
+            } else {
+                document.querySelector('.cat-filter[data-cat="All"]').classList.remove('active');
+                btn.classList.toggle('active');
+
+                const active = [...document.querySelectorAll('.cat-filter.active')]
+                    .map(b => b.dataset.cat)
+                    .filter(c => c !== 'All');
+
+                if (active.length === 0) {
+                    document.querySelector('.cat-filter[data-cat="All"]').classList.add('active');
+                    localStorage.removeItem(STORAGE_KEY);
+                } else {
+                    savePrefs(new Set(active));
+                }
+            }
+            applyCarouselFilters();
+        });
+    });
 }
 
 // render cards
@@ -143,17 +162,22 @@ function renderCarousel(events) {
         card.classList.add('carousel-card');
 
         const date = new Date(event.event_datetime);
+        const dateStr = date.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+        const timeStr = date.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
 
         card.innerHTML = `
-        
-        <div class="image-wrapper">
-        <img src="${event.image ? `/uploads/${event.image}` : '/images/ASU Logos/Arizona-State-Sun-Devils-logo.png'}" class="event-image">
+        <div class="carousel-card-inner">
+            <span class="carousel-badge">${event.type || 'Event'}</span>
+            <div class="image-wrapper">
+                <img src="${event.image ? `/uploads/${event.image}` : '/images/ASU Logos/Arizona-State-Sun-Devils-logo.png'}" class="event-image" onerror="this.src='/images/ASU Logos/Arizona-State-Sun-Devils-logo.png'">
+            </div>
+            <div class="carousel-info">
+                <h3>${event.description}</h3>
+                <p><strong>Date:</strong> ${dateStr}</p>
+                <p><strong>Time:</strong> ${timeStr}</p>
+                <p><strong>Location:</strong> ${event.location}</p>
+            </div>
         </div>
-
-            <h3>${event.description}</h3>
-            <p>${date.toLocaleDateString()}</p>
-            <p>${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-            <p>${event.location}</p>
         `;
 
         // OPTIONAL: store id for future use
